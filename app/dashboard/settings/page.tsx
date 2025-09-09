@@ -35,7 +35,7 @@ export default function SettingsPage() {
   ]
 
   const handleSave = () => {
-    addToast('Settings saved successfully', 'success')
+    addToast('success', 'Settings saved successfully')
   }
 
   return (
