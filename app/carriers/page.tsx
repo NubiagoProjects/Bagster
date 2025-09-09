@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Header from '@/components/ui/Header'
+import HomepageHeader from '@/components/ui/HomepageHeader'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import Footer from '@/components/ui/Footer'
 import Breadcrumbs from '@/components/ui/Breadcrumbs'
@@ -181,7 +181,7 @@ export default function CarriersPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen">
-        <Header />
+        <HomepageHeader />
         
         <div className="pt-32 pb-20 bg-slate-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -213,7 +213,7 @@ export default function CarriersPage() {
 
   return (
     <div className="min-h-screen">
-      <Header />
+      <HomepageHeader />
       <Breadcrumbs items={[{ label: 'Carriers' }]} />
       
       {/* Hero Section */}

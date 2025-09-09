@@ -1,4 +1,4 @@
-import Header from '@/components/ui/Header'
+import HomepageHeader from '@/components/ui/HomepageHeader'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import Footer from '@/components/ui/Footer'
 import { FileText, Shield, Users, AlertTriangle, CheckCircle } from 'lucide-react'
@@ -6,7 +6,7 @@ import { FileText, Shield, Users, AlertTriangle, CheckCircle } from 'lucide-reac
 export default function TermsPage() {
   return (
     <div className="min-h-screen">
-      <Header />
+      <HomepageHeader />
       
       {/* Hero Section */}
       <section className="pt-32 pb-20 bg-slate-50">

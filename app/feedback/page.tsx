@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Header from '@/components/ui/Header'
+import HomepageHeader from '@/components/ui/HomepageHeader'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import Footer from '@/components/ui/Footer'
 import { 
@@ -80,7 +80,7 @@ export default function FeedbackPage() {
   if (isSubmitted) {
     return (
       <div className="min-h-screen">
-        <Header />
+        <HomepageHeader />
         
         <div className="pt-32 pb-20 bg-slate-50">
           <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -112,7 +112,7 @@ export default function FeedbackPage() {
 
   return (
     <div className="min-h-screen">
-      <Header />
+      <HomepageHeader />
       
       {/* Hero Section */}
       <section className="pt-32 pb-20 bg-slate-50">

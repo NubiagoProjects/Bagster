@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Header from '@/components/ui/Header'
+import HomepageHeader from '@/components/ui/HomepageHeader'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import Footer from '@/components/ui/Footer'
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react'
@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen">
-      <Header />
+      <HomepageHeader />
       
       <div className="pt-32 pb-20 bg-slate-50">
         <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8">

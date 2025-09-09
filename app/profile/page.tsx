@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Header from '@/components/ui/Header'
+import HomepageHeader from '@/components/ui/HomepageHeader'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import Footer from '@/components/ui/Footer'
 import { 
@@ -41,7 +41,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen">
-      <Header />
+      <HomepageHeader />
       
       {/* Profile Header */}
       <section className="pt-32 pb-8 bg-white">
