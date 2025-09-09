@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { db } from '@/lib/firebase'
-import { collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, doc, updateDoc } from 'firebase/firestore'
+// import { db } from '@/lib/firebase' // Firebase disabled
+// Firebase imports disabled
+// import { collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, doc, updateDoc } from 'firebase/firestore'
 import { Send, Phone, Video, MoreVertical, Paperclip, Smile, User } from 'lucide-react'
 
 interface Message {
@@ -51,27 +52,31 @@ export default function RealTimeChat({
 
   // Real-time message listener
   useEffect(() => {
-    if (!chatId) return
-
-    const q = query(
-      collection(db, 'chats', chatId, 'messages'),
-      orderBy('timestamp', 'asc')
-    )
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const newMessages = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        timestamp: doc.data().timestamp?.toDate() || new Date()
-      })) as Message[]
-
-      setMessages(newMessages)
-      setLoading(false)
-      scrollToBottom()
-    })
-
-    return () => unsubscribe()
-  }, [chatId])
+    // Mock messages for testing (Firebase disabled)
+    const mockMessages: Message[] = [
+      {
+        id: '1',
+        text: 'Hello! Your shipment has been picked up.',
+        senderId: 'carrier_001',
+        senderName: 'Carrier Support',
+        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+        type: 'text',
+        isRead: true
+      },
+      {
+        id: '2',
+        text: 'Great! When can I expect delivery?',
+        senderId: currentUserId,
+        senderName: currentUserName,
+        timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000),
+        type: 'text',
+        isRead: true
+      }
+    ]
+    
+    setMessages(mockMessages)
+    setLoading(false)
+  }, [chatId, currentUserId, currentUserName])
 
   // Auto-scroll to bottom
   const scrollToBottom = () => {
@@ -84,11 +89,12 @@ export default function RealTimeChat({
 
     setSending(true)
     try {
-      await addDoc(collection(db, 'chats', chatId, 'messages'), {
+      // Mock message sending (Firebase disabled)
+      console.log('Mock message sent:', {
         text: newMessage.trim(),
         senderId: currentUserId,
         senderName: currentUserName,
-        timestamp: serverTimestamp(),
+        timestamp: new Date(),
         type: 'text',
         isRead: false
       })
@@ -117,7 +123,8 @@ export default function RealTimeChat({
     )
 
     const promises = unreadMessages.map(msg =>
-      updateDoc(doc(db, 'chats', chatId, 'messages', msg.id), {
+      // Mock status update (Firebase disabled)
+      console.log('Mock status update:', {
         isRead: true
       })
     )

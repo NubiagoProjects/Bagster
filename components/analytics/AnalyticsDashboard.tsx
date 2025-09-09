@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { db } from '@/lib/firebase'
-import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore'
+// Firebase disabled - using mock data
+// import { db } from '@/lib/firebase'
+// import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area } from 'recharts'
 import { TrendingUp, TrendingDown, Package, Users, Truck, DollarSign, Activity, Calendar, Filter, Download } from 'lucide-react'
 
@@ -53,166 +54,66 @@ export default function AnalyticsDashboard({ userRole = 'admin', userId, classNa
     setError(null)
     
     try {
-      const endDate = new Date()
-      const startDate = new Date()
+      // Mock analytics data for testing (Firebase disabled)
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate loading
       
-      switch (timeRange) {
-        case '7d':
-          startDate.setDate(endDate.getDate() - 7)
-          break
-        case '30d':
-          startDate.setDate(endDate.getDate() - 30)
-          break
-        case '90d':
-          startDate.setDate(endDate.getDate() - 90)
-          break
-        case '1y':
-          startDate.setFullYear(endDate.getFullYear() - 1)
-          break
+      const mockData: AnalyticsData = {
+        totalShipments: userRole === 'carrier' ? 156 : 1247,
+        totalRevenue: userRole === 'carrier' ? 45000 : 234500,
+        totalCarriers: userRole === 'admin' ? 89 : 0,
+        totalUsers: userRole === 'admin' ? 1247 : 0,
+        shipmentsGrowth: 12,
+        revenueGrowth: 18,
+        carriersGrowth: 5,
+        usersGrowth: 8,
+        shipmentsByStatus: [
+          { name: 'DELIVERED', value: 45, color: statusColors.delivered },
+          { name: 'IN TRANSIT', value: 23, color: statusColors.in_transit },
+          { name: 'PENDING', value: 12, color: statusColors.pending },
+          { name: 'OUT FOR DELIVERY', value: 8, color: statusColors.out_for_delivery },
+          { name: 'CANCELLED', value: 3, color: statusColors.cancelled }
+        ],
+        shipmentsByMonth: [
+          { month: 'Jan 2024', shipments: 45, revenue: 12000 },
+          { month: 'Feb 2024', shipments: 52, revenue: 14500 },
+          { month: 'Mar 2024', shipments: 48, revenue: 13200 },
+          { month: 'Apr 2024', shipments: 61, revenue: 16800 },
+          { month: 'May 2024', shipments: 58, revenue: 15900 },
+          { month: 'Jun 2024', shipments: 67, revenue: 18400 }
+        ],
+        topCarriers: userRole === 'admin' ? [
+          { name: 'FastTrack Logistics', shipments: 234, rating: 4.8, revenue: 45000 },
+          { name: 'Express Delivery Co', shipments: 189, rating: 4.6, revenue: 38000 },
+          { name: 'Swift Transport', shipments: 156, rating: 4.7, revenue: 32000 },
+          { name: 'Global Shipping Ltd', shipments: 134, rating: 4.5, revenue: 28000 },
+          { name: 'Quick Move Express', shipments: 98, rating: 4.4, revenue: 21000 }
+        ] : [],
+        recentActivity: [
+          {
+            id: '1',
+            type: 'shipment_delivered',
+            description: 'Shipment BAG123456789 delivered successfully',
+            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
+          },
+          {
+            id: '2',
+            type: 'shipment_pickup',
+            description: 'Shipment BAG987654321 picked up by carrier',
+            timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000) // 4 hours ago
+          },
+          {
+            id: '3',
+            type: 'shipment_created',
+            description: 'New shipment BAG456789123 created',
+            timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000) // 6 hours ago
+          }
+        ]
       }
 
-      // Build queries based on user role
-      let shipmentsQuery = query(
-        collection(db, 'shipments'),
-        where('createdAt', '>=', startDate),
-        where('createdAt', '<=', endDate),
-        orderBy('createdAt', 'desc')
-      )
+      setData(mockData)
 
-      if (userRole === 'carrier' && userId) {
-        shipmentsQuery = query(
-          collection(db, 'shipments'),
-          where('carrierId', '==', userId),
-          where('createdAt', '>=', startDate),
-          where('createdAt', '<=', endDate),
-          orderBy('createdAt', 'desc')
-        )
-      } else if (userRole === 'user' && userId) {
-        shipmentsQuery = query(
-          collection(db, 'shipments'),
-          where('userId', '==', userId),
-          where('createdAt', '>=', startDate),
-          where('createdAt', '<=', endDate),
-          orderBy('createdAt', 'desc')
-        )
-      }
-
-      // Load shipments data
-      const shipmentsSnapshot = await getDocs(shipmentsQuery)
-      const shipments = shipmentsSnapshot.docs.map(doc => {
-        const data = doc.data()
-        return {
-          id: doc.id,
-          cost: data.cost || 0,
-          status: data.status || 'pending',
-          trackingNumber: data.trackingNumber || '',
-          userId: data.userId || '',
-          carrierId: data.carrierId || '',
-          createdAt: data.createdAt?.toDate() || new Date(),
-          ...data
-        }
-      })
-
-      // Calculate metrics
-      const totalShipments = shipments.length
-      const totalRevenue = shipments.reduce((sum, s) => sum + (s.cost || 0), 0)
-
-      // Load carriers data (admin only)
-      let totalCarriers = 0
-      let topCarriers: any[] = []
-      if (userRole === 'admin') {
-        const carriersSnapshot = await getDocs(collection(db, 'carriers'))
-        totalCarriers = carriersSnapshot.size
-        
-        topCarriers = carriersSnapshot.docs
-          .map(doc => {
-            const data = doc.data()
-            return {
-              id: doc.id,
-              name: data.name || 'Unknown Carrier',
-              totalShipments: data.totalShipments || 0,
-              rating: data.rating || 0,
-              totalRevenue: data.totalRevenue || 0,
-              ...data
-            }
-          })
-          .sort((a, b) => (b.totalShipments || 0) - (a.totalShipments || 0))
-          .slice(0, 5)
-          .map(carrier => ({
-            name: carrier.name,
-            shipments: carrier.totalShipments || 0,
-            rating: carrier.rating || 0,
-            revenue: carrier.totalRevenue || 0
-          }))
-      }
-
-      // Load users data (admin only)
-      let totalUsers = 0
-      if (userRole === 'admin') {
-        const usersSnapshot = await getDocs(collection(db, 'users'))
-        totalUsers = usersSnapshot.size
-      }
-
-      // Calculate shipments by status
-      const statusCounts = shipments.reduce((acc, shipment) => {
-        const status = shipment.status || 'pending'
-        acc[status] = (acc[status] || 0) + 1
-        return acc
-      }, {} as Record<string, number>)
-
-      const shipmentsByStatus = Object.entries(statusCounts).map(([status, count]) => ({
-        name: status.replace('_', ' ').toUpperCase(),
-        value: count,
-        color: statusColors[status as keyof typeof statusColors] || '#6b7280'
-      }))
-
-      // Calculate monthly data
-      const monthlyData = shipments.reduce((acc, shipment) => {
-        const month = shipment.createdAt.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-        if (!acc[month]) {
-          acc[month] = { shipments: 0, revenue: 0 }
-        }
-        acc[month].shipments += 1
-        acc[month].revenue += (shipment.cost || 0)
-        return acc
-      }, {} as Record<string, { shipments: number; revenue: number }>)
-
-      const shipmentsByMonth = Object.entries(monthlyData).map(([month, data]) => ({
-        month,
-        shipments: data.shipments,
-        revenue: data.revenue
-      }))
-
-      // Recent activity
-      const recentActivity = shipments.slice(0, 10).map(shipment => ({
-        id: shipment.id,
-        type: 'shipment',
-        description: `Shipment ${shipment.trackingNumber || 'N/A'} ${(shipment.status || 'pending').replace('_', ' ')}`,
-        timestamp: shipment.createdAt
-      }))
-
-      // Calculate growth (mock data for demo)
-      const shipmentsGrowth = Math.floor(Math.random() * 30) - 10
-      const revenueGrowth = Math.floor(Math.random() * 25) - 5
-      const carriersGrowth = Math.floor(Math.random() * 15) - 5
-      const usersGrowth = Math.floor(Math.random() * 20) - 5
-
-      setData({
-        totalShipments,
-        totalRevenue,
-        totalCarriers,
-        totalUsers,
-        shipmentsGrowth,
-        revenueGrowth,
-        carriersGrowth,
-        usersGrowth,
-        shipmentsByStatus,
-        shipmentsByMonth,
-        topCarriers,
-        recentActivity
-      })
     } catch (error) {
-      console.error('Failed to load analytics data:', error)
+      console.error('Error loading analytics data:', error)
       setError('Failed to load analytics data')
     } finally {
       setLoading(false)
