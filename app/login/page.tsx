@@ -38,38 +38,35 @@ export default function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
     
+    // Auto-login bypass for testing - no authentication required
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-          userType: userType
-        }),
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        // Store session token (in production, use secure storage)
-        localStorage.setItem('sessionToken', data.data.sessionToken)
-        localStorage.setItem('user', JSON.stringify(data.data.user))
-        
-        addToast('success', 'Login successful!')
-        
-        // Redirect to appropriate dashboard
-        setTimeout(() => {
-          window.location.href = data.data.redirectUrl
-        }, 1000)
-      } else {
-        addToast('error', data.error || 'Login failed')
+      // Create mock user based on selected type
+      const mockUser = {
+        id: userType === 'admin' ? 'admin_001' : 'carrier_001',
+        email: userType === 'admin' ? 'admin@bagster.com' : 'carrier@bagster.com',
+        name: userType === 'admin' ? 'Admin User' : 'Carrier User',
+        userType: userType,
+        verified: true
       }
+      
+      const sessionToken = `mock_session_${mockUser.id}_${Date.now()}`
+      
+      // Store session data
+      localStorage.setItem('sessionToken', sessionToken)
+      localStorage.setItem('user', JSON.stringify(mockUser))
+      
+      addToast('success', 'Login successful! (Authentication bypassed for testing)')
+      
+      // Redirect to appropriate dashboard
+      const redirectUrl = userType === 'admin' ? '/admin/dashboard' : '/carrier/dashboard'
+      
+      setTimeout(() => {
+        window.location.href = redirectUrl
+      }, 1000)
+      
     } catch (error) {
       console.error('Login error:', error)
-      addToast('error', 'Network error. Please try again.')
+      addToast('error', 'Login failed')
     } finally {
       setIsLoading(false)
     }
@@ -93,12 +90,13 @@ export default function LoginPage() {
             Sign in to your account to access the dashboard
           </p>
           
-          {/* Test Credentials Info */}
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-xs text-blue-700 font-medium mb-2">Test Accounts:</p>
-            <div className="text-xs text-blue-600 space-y-1">
-              <div><strong>Carrier:</strong> carrier@bagster.com / carrier123</div>
-              <div><strong>Admin:</strong> admin@bagster.com / admin123</div>
+          {/* Authentication Bypass Notice */}
+          <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+            <p className="text-xs text-green-700 font-medium mb-2">🔓 Authentication Disabled for Testing</p>
+            <div className="text-xs text-green-600 space-y-1">
+              <div>• No credentials required - just select user type and click Sign In</div>
+              <div>• Direct dashboard access available</div>
+              <div>• Firebase authentication bypassed</div>
             </div>
           </div>
         </div>
@@ -137,7 +135,7 @@ export default function LoginPage() {
                   <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                     <div>
                       <label htmlFor="email" className="block text-sm font-light text-gray-700 mb-2">
-                        Email Address
+                        Email Address (Optional for Testing)
                       </label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 sm:w-5 h-4 sm:h-5" />
@@ -147,15 +145,14 @@ export default function LoginPage() {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className="pl-10 sm:pl-10 h-11 sm:h-12 text-sm sm:text-base"
-                          placeholder="Enter your email"
-                          required
+                          placeholder="Any email (not validated)"
                         />
                       </div>
                     </div>
 
                     <div>
                       <label htmlFor="password" className="block text-sm font-light text-gray-700 mb-2">
-                        Password
+                        Password (Optional for Testing)
                       </label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 sm:w-5 h-4 sm:h-5" />
@@ -165,8 +162,7 @@ export default function LoginPage() {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           className="pl-10 pr-10 sm:pr-10 h-11 sm:h-12 text-sm sm:text-base"
-                          placeholder="Enter your password"
-                          required
+                          placeholder="Any password (not validated)"
                         />
                         <button
                           type="button"
@@ -214,13 +210,32 @@ export default function LoginPage() {
                     </button>
                   </form>
 
-                  <div className="text-center pt-2">
+                  <div className="text-center pt-2 space-y-3">
                     <p className="text-sm text-gray-600 font-light">
                       Don't have an account?{' '}
                       <Link href="/register" className="font-medium text-brand-primary hover:text-brand-primary/80">
                         Sign up
                       </Link>
                     </p>
+                    
+                    {/* Direct Dashboard Access */}
+                    <div className="pt-3 border-t border-gray-200">
+                      <p className="text-xs text-gray-500 mb-2">Direct Dashboard Access (No Login Required):</p>
+                      <div className="flex space-x-2">
+                        <Link 
+                          href="/admin/dashboard" 
+                          className="flex-1 px-3 py-2 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors"
+                        >
+                          Admin Dashboard
+                        </Link>
+                        <Link 
+                          href="/carrier/dashboard" 
+                          className="flex-1 px-3 py-2 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+                        >
+                          Carrier Dashboard
+                        </Link>
+                      </div>
+                    </div>
                   </div>
                 </div>
         </div>

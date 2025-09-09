@@ -41,19 +41,21 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Find user
+    // Find user - Allow any matching email/password regardless of userType for testing
     const user = mockUsers.find(u => 
       u.email.toLowerCase() === email.toLowerCase() && 
-      u.password === password &&
-      u.userType === userType
+      u.password === password
     );
 
     if (!user) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid credentials or user type'
+        error: 'Invalid credentials'
       }, { status: 401 });
     }
+
+    // Override userType with the requested one for dashboard access
+    const effectiveUserType = userType;
 
     // Create session token (in production, use JWT or secure session)
     const sessionToken = `session_${user.id}_${Date.now()}`;
@@ -66,12 +68,12 @@ export async function POST(request: NextRequest) {
           id: user.id,
           email: user.email,
           name: user.name,
-          userType: user.userType,
+          userType: effectiveUserType,
           verified: user.verified
         },
         sessionToken,
-        redirectUrl: user.userType === 'admin' ? '/admin/dashboard' : 
-                    user.userType === 'carrier' ? '/carrier/dashboard' : '/dashboard'
+        redirectUrl: effectiveUserType === 'admin' ? '/admin/dashboard' : 
+                    effectiveUserType === 'carrier' ? '/carrier/dashboard' : '/dashboard'
       }
     });
 
