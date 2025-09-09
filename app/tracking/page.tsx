@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Header from '@/components/ui/Header'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 import Footer from '@/components/ui/Footer'
 import { 
   Search, 
@@ -184,6 +185,7 @@ export default function TrackingPage() {
       {/* Hero Section */}
       <section className="pt-32 pb-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb />
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-light text-gray-900 mb-6">
               Track Your

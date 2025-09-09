@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Header from '@/components/ui/Header'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 import Footer from '@/components/ui/Footer'
 import { 
   Package, 
@@ -154,6 +155,7 @@ export default function ShipmentsPage() {
       {/* Hero Section */}
       <section className="pt-32 pb-8 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb />
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-3xl font-light text-gray-900 mb-2">My <span className="text-black">Shipments</span></h1>

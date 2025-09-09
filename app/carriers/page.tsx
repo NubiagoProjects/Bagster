@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Header from '@/components/ui/Header'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 import Footer from '@/components/ui/Footer'
 import Breadcrumbs from '@/components/ui/Breadcrumbs'
 import { 
@@ -184,6 +185,7 @@ export default function CarriersPage() {
         
         <div className="pt-32 pb-20 bg-slate-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb />
             {/* Hero Section Skeleton */}
             <div className="text-center mb-16">
               <div className="h-12 bg-slate-200 rounded-lg w-3/4 mx-auto mb-4 animate-pulse"></div>

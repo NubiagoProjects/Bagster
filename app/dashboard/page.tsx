@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Header from '@/components/ui/Header'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 import Footer from '@/components/ui/Footer'
 import Breadcrumbs from '@/components/ui/Breadcrumbs'
 import { 
@@ -191,6 +192,7 @@ export default function DashboardPage() {
       {/* Dashboard Header */}
       <section className="pt-32 pb-8 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb />
           <Breadcrumbs items={breadcrumbItems} />
           
           <div className="flex items-center justify-between mb-8">

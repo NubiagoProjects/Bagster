@@ -3,7 +3,7 @@ const nextConfig = {
   experimental: {
     webpackBuildWorker: true,
   },
-  trailingSlash: true,
+  output: 'standalone',
   images: {
     unoptimized: true,
     domains: ['localhost', 'images.unsplash.com', 'via.placeholder.com'],
@@ -23,6 +23,13 @@ const nextConfig = {
       net: false,
       tls: false,
     };
+    
+    // Exclude functions directory from build
+    config.externals = config.externals || [];
+    if (isServer) {
+      config.externals.push(/^functions\//);
+    }
+    
     return config;
   },
 }

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Header from '@/components/ui/Header'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 import Footer from '@/components/ui/Footer'
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react'
 

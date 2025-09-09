@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Header from '@/components/ui/Header'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 import Footer from '@/components/ui/Footer'
 import { 
   MessageSquare, 
@@ -116,6 +117,7 @@ export default function FeedbackPage() {
       {/* Hero Section */}
       <section className="pt-32 pb-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb />
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6">
               Send

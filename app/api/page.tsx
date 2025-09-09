@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Header from '@/components/ui/Header'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 import Footer from '@/components/ui/Footer'
 import { 
   Code, 
@@ -190,6 +191,7 @@ export default function ApiPage() {
       {/* Hero Section */}
       <section className="bg-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb />
           <div className="text-center">
             <div className="flex items-center justify-center mb-8">
               <div className="w-12 h-12 bg-black rounded flex items-center justify-center">

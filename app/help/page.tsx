@@ -1,5 +1,6 @@
 import Header from '@/components/ui/Header'
 import Footer from '@/components/ui/Footer'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 import { 
   Search, 
   BookOpen, 
@@ -94,6 +95,7 @@ export default function HelpPage() {
       {/* Hero Section */}
       <section className="pt-32 pb-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb />
           <div className="text-center mb-16">
             <div className="flex items-center justify-center mb-8">
               <div className="w-12 h-12 bg-black rounded flex items-center justify-center">

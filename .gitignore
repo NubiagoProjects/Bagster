@@ -60,3 +60,5 @@ pids
 
 # Deployment
 windsurf_deployment.yaml
+
+.vercel

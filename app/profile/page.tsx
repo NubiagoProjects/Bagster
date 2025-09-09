@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Header from '@/components/ui/Header'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 import Footer from '@/components/ui/Footer'
 import { 
   User, 
@@ -45,6 +46,7 @@ export default function ProfilePage() {
       {/* Profile Header */}
       <section className="pt-32 pb-8 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb />
           <div className="flex items-center justify-between mb-8">
             <div>
               <div className="flex items-center mb-4">
