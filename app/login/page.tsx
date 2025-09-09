@@ -21,14 +21,14 @@ export default function LoginPage() {
   const router = useRouter()
 
   // Test users
-  const testUsers = {
+  const testCredentials = {
     carrier: {
-      email: 'carrier@test.com',
+      email: 'carrier@bagster.com', 
       password: 'carrier123',
       name: 'Test Carrier'
     },
     admin: {
-      email: 'admin@test.com', 
+      email: 'admin@bagster.com', 
       password: 'admin123',
       name: 'Test Admin'
     }
