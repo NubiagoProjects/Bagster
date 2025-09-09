@@ -2,11 +2,12 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Truck, Package, MapPin, Users, Star, ArrowRight, CheckCircle, Globe, Shield, Clock, BarChart3, Zap, Award, Heart, Search, ShoppingCart, Menu, ChevronRight } from 'lucide-react'
-import { Button } from '../components/ui/Button'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
-import HomepageHeader from '../components/ui/HomepageHeader'
 import Link from 'next/link'
+import { ArrowRight, Shield, Clock, Globe, Star, CheckCircle, Truck, Package, MapPin, Users, TrendingUp, Award, Zap, Heart } from 'lucide-react'
+import HomepageHeader from '@/components/ui/HomepageHeader'
+import { Button } from '@/components/ui/Button'
+import { Logo } from '@/components/Logo'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 
 export default function HomePage() {
   return (
@@ -17,36 +18,37 @@ export default function HomePage() {
       <section className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 overflow-hidden">
         <div className="absolute inset-0">
           {/* Geometric Background Elements */}
-          <div className="absolute top-20 right-20 w-96 h-96 bg-brand-primary/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 left-20 w-80 h-80 bg-blue-200/20 rounded-full blur-2xl"></div>
-          <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-indigo-100/30 rounded-full blur-xl"></div>
+          <div className="absolute top-10 sm:top-20 right-4 sm:right-20 w-48 sm:w-96 h-48 sm:h-96 bg-brand-primary/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-10 sm:bottom-20 left-4 sm:left-20 w-32 sm:w-80 h-32 sm:h-80 bg-blue-200/20 rounded-full blur-2xl"></div>
+          <div className="absolute top-1/2 left-1/4 sm:left-1/3 w-24 sm:w-64 h-24 sm:h-64 bg-indigo-100/30 rounded-full blur-xl"></div>
         </div>
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="min-h-screen flex items-center">
-            <div className="grid lg:grid-cols-12 gap-8 items-center w-full">
+          <div className="min-h-screen flex items-center pt-20 sm:pt-16">
+            <div className="grid lg:grid-cols-12 gap-6 lg:gap-8 items-center w-full">
               
               {/* Left Column - Content (7 columns) */}
-              <div className="lg:col-span-7 space-y-10">
-                <div className="space-y-8">
-                  <div className="space-y-6">
-                    <div className="inline-flex items-center px-6 py-3 rounded-full bg-white/80 backdrop-blur-sm border border-brand-primary/20 text-brand-primary text-sm font-semibold shadow-lg">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mr-3 animate-pulse"></div>
-                      Live: 2,847 shipments in transit across Africa
+              <div className="lg:col-span-7 space-y-6 sm:space-y-8 lg:space-y-10">
+                <div className="space-y-6 sm:space-y-8">
+                  <div className="space-y-4 sm:space-y-6">
+                    <div className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-white/80 backdrop-blur-sm border border-brand-primary/20 text-brand-primary text-xs sm:text-sm font-semibold shadow-lg">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2 sm:mr-3 animate-pulse"></div>
+                      <span className="hidden sm:inline">Live: 2,847 shipments in transit across Africa</span>
+                      <span className="sm:hidden">2,847 live shipments</span>
                     </div>
                     
-                    <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 leading-[0.9]">
-                      Ship Smarter
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-gray-900 leading-tight sm:leading-[0.9]">
+                      <span className="block">Ship Smarter</span>
                       <span className="block text-brand-primary">Across Africa</span>
                     </h1>
                     
-                    <p className="text-2xl text-gray-600 font-light leading-relaxed max-w-2xl">
+                    <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 font-light leading-relaxed max-w-2xl">
                       The continent's most trusted logistics marketplace. Connect with verified carriers, track in real-time, and scale your business across 25+ countries.
                     </p>
                   </div>
 
                   {/* Quick Stats Bar */}
-                  <div className="flex items-center space-x-8 py-6 px-8 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/40 shadow-lg">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6 lg:space-x-8 py-4 sm:py-6 px-4 sm:px-6 lg:px-8 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/40 shadow-lg">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-brand-primary">10K+</div>
                       <div className="text-sm text-gray-600 font-medium">Shipments</div>
@@ -69,18 +71,23 @@ export default function HomePage() {
                   </div>
                   
                   {/* CTA Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-6">
-                    <Link href="/shipments">
-                      <Button size="lg" className="bg-brand-primary text-white hover:bg-blue-700 px-10 py-5 text-xl font-semibold shadow-2xl hover:shadow-3xl transition-all duration-300 group rounded-2xl">
-                        Start Shipping Now
-                        <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-2 transition-transform" />
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                    <Link href="/register">
+                      <Button className="bg-brand-primary hover:bg-brand-primary/90 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 group w-full sm:w-auto">
+                        <span>Get Started Free</span>
+                        <ArrowRight className="ml-2 w-4 sm:w-5 h-4 sm:h-5 group-hover:translate-x-1 transition-transform" />
                       </Button>
                     </Link>
-                    <Link href="/tracking">
-                      <Button variant="outline" size="lg" className="border-2 border-gray-300 text-gray-700 bg-white/80 backdrop-blur-sm hover:bg-white px-10 py-5 text-xl font-semibold transition-all duration-300 rounded-2xl">
-                        Track Shipment
-                      </Button>
-                    </Link>
+                    
+                    <button 
+                      onClick={() => window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank')}
+                      className="border-2 border-gray-300 hover:border-brand-primary text-gray-700 hover:text-brand-primary px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-xl transition-all duration-200 group bg-white/80 backdrop-blur-sm w-full sm:w-auto"
+                    >
+                      <span>Watch Demo</span>
+                      <div className="ml-2 w-4 sm:w-5 h-4 sm:h-5 rounded-full bg-brand-primary/10 group-hover:bg-brand-primary/20 flex items-center justify-center transition-colors">
+                        <div className="w-0 h-0 border-l-[5px] sm:border-l-[6px] border-l-brand-primary border-y-[3px] sm:border-y-[4px] border-y-transparent ml-0.5"></div>
+                      </div>
+                    </button>
                   </div>
 
                   {/* Trust Badges */}
@@ -102,19 +109,19 @@ export default function HomePage() {
               </div>
 
               {/* Right Column - Visual (5 columns) */}
-              <div className="lg:col-span-5 relative">
+              <div className="lg:col-span-5 relative mt-8 lg:mt-0">
                 <div className="relative">
                   {/* Main Image Container */}
-                  <div className="relative bg-gradient-to-br from-brand-primary to-blue-700 rounded-3xl p-8 shadow-2xl transform rotate-3 hover:rotate-1 transition-transform duration-500">
-                    <div className="bg-white rounded-2xl p-6 space-y-6">
+                  <div className="relative bg-gradient-to-br from-brand-primary to-blue-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-2xl transform rotate-1 sm:rotate-3 hover:rotate-0 sm:hover:rotate-1 transition-transform duration-500">
+                    <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-6">
                       {/* Mock Dashboard */}
                       <div className="flex items-center justify-between">
-                        <h3 className="font-bold text-gray-900">Live Shipment Tracking</h3>
-                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <h3 className="text-sm sm:text-base font-bold text-gray-900">Live Shipment Tracking</h3>
+                        <div className="w-2 sm:w-3 h-2 sm:h-3 bg-green-500 rounded-full animate-pulse"></div>
                       </div>
                       
                       {/* Map Visualization */}
-                      <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-6 h-48 relative overflow-hidden">
+                      <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg sm:rounded-xl p-3 sm:p-6 h-32 sm:h-48 relative overflow-hidden">
                         <div className="absolute inset-0 opacity-20">
                           <svg viewBox="0 0 400 200" className="w-full h-full">
                             <path d="M50,150 Q150,50 250,100 T350,80" stroke="#004aac" strokeWidth="3" fill="none" strokeDasharray="5,5">
@@ -122,57 +129,65 @@ export default function HomePage() {
                             </path>
                           </svg>
                         </div>
-                        <div className="relative z-10 space-y-3">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                            <span className="text-sm font-medium">Lagos → Nairobi</span>
+                        <div className="relative z-10 space-y-2 sm:space-y-3">
+                          <div className="flex items-center space-x-2 sm:space-x-3">
+                            <div className="w-2 sm:w-3 h-2 sm:h-3 bg-green-500 rounded-full"></div>
+                            <span className="text-xs sm:text-sm font-medium">Lagos → Nairobi</span>
                           </div>
-                          <div className="flex items-center space-x-3">
-                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                            <span className="text-sm font-medium">Cairo → Cape Town</span>
+                          <div className="flex items-center space-x-2 sm:space-x-3">
+                            <div className="w-2 sm:w-3 h-2 sm:h-3 bg-blue-500 rounded-full"></div>
+                            <span className="text-xs sm:text-sm font-medium">Cairo → Cape Town</span>
                           </div>
-                          <div className="flex items-center space-x-3">
-                            <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                            <span className="text-sm font-medium">Accra → Addis Ababa</span>
+                          <div className="flex items-center space-x-2 sm:space-x-3">
+                            <div className="w-2 sm:w-3 h-2 sm:h-3 bg-purple-500 rounded-full"></div>
+                            <span className="text-xs sm:text-sm font-medium">Accra → Addis Ababa</span>
                           </div>
                         </div>
                       </div>
                       
                       {/* Stats */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-gray-50 rounded-lg p-4 text-center">
-                          <div className="text-2xl font-bold text-brand-primary">847</div>
+                      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                        <div className="bg-gray-50 rounded-lg p-3 sm:p-4 text-center">
+                          <div className="text-lg sm:text-2xl font-bold text-brand-primary">847</div>
                           <div className="text-xs text-gray-600">Active Routes</div>
                         </div>
-                        <div className="bg-gray-50 rounded-lg p-4 text-center">
-                          <div className="text-2xl font-bold text-green-600">98%</div>
+                        <div className="bg-gray-50 rounded-lg p-3 sm:p-4 text-center">
+                          <div className="text-lg sm:text-2xl font-bold text-green-600">98%</div>
                           <div className="text-xs text-gray-600">Success Rate</div>
                         </div>
                       </div>
                     </div>
                   </div>
                   
-                  {/* Floating Elements */}
-                  <div className="absolute -top-6 -left-6 bg-white rounded-2xl p-4 shadow-xl border border-gray-100 transform -rotate-12">
+                  {/* Floating Elements - Hidden on mobile for cleaner layout */}
+                  <div className="hidden sm:block absolute -top-6 -left-6 bg-white rounded-2xl p-4 shadow-xl border border-gray-100 transform -rotate-12">
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                        <CheckCircle className="w-5 h-5 text-green-600" />
+                      <div className="w-10 sm:w-12 h-10 sm:h-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <TrendingUp className="w-5 sm:w-6 h-5 sm:h-6 text-green-600" />
                       </div>
                       <div>
-                        <div className="text-sm font-semibold text-gray-900">Delivered</div>
-                        <div className="text-xs text-gray-500">2 mins ago</div>
+                        <div className="text-xl sm:text-2xl font-bold text-gray-900">25+</div>
+                        <div className="text-xs sm:text-sm text-gray-600 font-light">Countries</div>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="absolute -bottom-4 -right-4 bg-white rounded-2xl p-4 shadow-xl border border-gray-100 transform rotate-6">
+                    
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <Truck className="w-5 h-5 text-blue-600" />
+                      <div className="w-10 sm:w-12 h-10 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Users className="w-5 sm:w-6 h-5 sm:h-6 text-blue-600" />
                       </div>
                       <div>
-                        <div className="text-sm font-semibold text-gray-900">In Transit</div>
-                        <div className="text-xs text-gray-500">ETA: 2 hours</div>
+                        <div className="text-xl sm:text-2xl font-bold text-gray-900">5,000+</div>
+                        <div className="text-xs sm:text-sm text-gray-600 font-light">Carriers</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 sm:w-12 h-10 sm:h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                        <Award className="w-5 sm:w-6 h-5 sm:h-6 text-purple-600" />
+                      </div>
+                      <div>
+                        <div className="text-xl sm:text-2xl font-bold text-gray-900">98%</div>
+                        <div className="text-xs sm:text-sm text-gray-600 font-light">Success Rate</div>
                       </div>
                     </div>
                   </div>
@@ -344,7 +359,9 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-4">
               <div className="flex items-center">
-                <span className="text-2xl font-brand font-bold text-brand-primary">Bagster</span>
+                <div className="h-6 sm:h-8">
+                  <Logo width="160" height="40" className="w-32 sm:w-40 h-8 sm:h-10 brightness-0 invert" />
+                </div>
               </div>
               <p className="text-slate-400 max-w-xs">
                 Africa's leading cargo marketplace connecting shippers with trusted carriers.

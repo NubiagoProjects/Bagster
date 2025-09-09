@@ -121,17 +121,30 @@ export default function TrackingPage() {
     setIsLoading(true)
     setTrackingData(null)
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    try {
+      const response = await fetch('/api/v1/tracking', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tracking_number: trackingNumber.trim()
+        }),
+      })
 
-    // Mock validation - only accept specific tracking numbers
-    if (trackingNumber === 'BGS123456789' || trackingNumber === 'BGS987654321') {
-      setTrackingData(mockTrackingData)
-    } else {
-      setError('Tracking number not found. Please check and try again.')
+      const data = await response.json()
+
+      if (data.success) {
+        setTrackingData(data.data)
+      } else {
+        setError(data.error || 'Tracking number not found')
+      }
+    } catch (error) {
+      console.error('Tracking error:', error)
+      setError('Network error. Please try again.')
+    } finally {
+      setIsLoading(false)
     }
-
-    setIsLoading(false)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

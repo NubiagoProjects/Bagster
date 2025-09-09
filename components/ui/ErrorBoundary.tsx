@@ -1,12 +1,13 @@
 'use client'
 
-import React, { Component, ReactNode } from 'react'
-import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react'
+import React, { Component, ErrorInfo, ReactNode } from 'react'
+import { useRouter } from 'next/navigation'
+import { AlertTriangle, RefreshCw, Home, Bug, Mail } from 'lucide-react'
 
 interface ErrorBoundaryState {
   hasError: boolean
   error: Error | null
-  errorInfo: React.ErrorInfo | null
+  errorInfo: ErrorInfo | null
 }
 
 interface ErrorBoundaryProps {
@@ -105,11 +106,16 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   handleReload = () => {
-    window.location.reload()
+    if (typeof window !== 'undefined') {
+      window.location.reload()
+    }
   }
 
   handleGoHome = () => {
-    window.location.href = '/'
+    // Use Next.js router for navigation
+    if (typeof window !== 'undefined') {
+      window.location.href = '/'
+    }
   }
 
   render() {

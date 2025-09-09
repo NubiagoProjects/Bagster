@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Truck, Mail, Phone, MapPin, Twitter, Facebook, Instagram, Linkedin, Github } from 'lucide-react'
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react'
+import { Logo } from '../Logo'
 
 export default function Footer() {
   return (
@@ -8,15 +9,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Company Info */}
           <div className="lg:col-span-1">
-            <Link href="/" className="flex items-center space-x-3 mb-6 group">
-              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-200 shadow-sm">
-                <Truck className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-white group-hover:text-blue-300 transition-colors duration-200">
-                  Bagster
-                </div>
-                <div className="text-sm text-slate-300 font-medium">Marketplace</div>
+            <Link href="/" className="flex items-center group">
+              <div className="h-6 sm:h-8 group-hover:scale-105 transition-transform duration-200">
+                <Logo width="160" height="40" className="w-32 sm:w-40 h-8 sm:h-10 brightness-0 invert" />
               </div>
             </Link>
             <p className="text-slate-300 leading-relaxed mb-6">

@@ -180,7 +180,7 @@ class NotificationService {
         
         // Show browser notification if supported
         if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-          new Notification(title, { body, icon: '/favicon.ico' })
+          new Notification(title, { body, icon: '/bagster-icon.svg' })
         }
       } else {
         console.error(`🔔 Push notification failed for user ${userId}: ${title}`)

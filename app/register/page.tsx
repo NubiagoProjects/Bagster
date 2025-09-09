@@ -2,24 +2,31 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Eye, EyeOff, Mail, Lock, User, Phone, Building, Truck, Shield } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Eye, EyeOff, User, Mail, Phone, MapPin, Building, Truck, Shield, Lock } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
+import { Logo } from '@/components/Logo'
 import { useToast } from '@/components/ui/ToastContext'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import Header from '@/components/ui/Header'
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
+    userType: 'carrier' as 'carrier' | 'admin',
     firstName: '',
     lastName: '',
     email: '',
-    password: '',
-    confirmPassword: '',
     phone: '',
-    companyName: '',
-    userType: 'carrier' as 'admin' | 'carrier'
+    company: '',
+    location: '',
+    password: '',
+    confirmPassword: ''
   })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { addToast } = useToast()
+  const router = useRouter()
 
   const handleInputChange = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value })
@@ -51,29 +58,59 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    if (!validateForm()) {
-      return
-    }
-
     setIsLoading(true)
+    
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
+          userType: formData.userType,
+          companyName: formData.company,
+          contactPerson: `${formData.firstName} ${formData.lastName}`,
+          phone: formData.phone,
+          terms: true
+        }),
+      })
 
-    // Simulate registration process
-    setTimeout(() => {
-      addToast('success', `Account created successfully! Welcome to Bagster as ${formData.userType}`)
+      const data = await response.json()
+
+      if (data.success) {
+        // Store session token
+        localStorage.setItem('sessionToken', data.data.sessionToken)
+        localStorage.setItem('user', JSON.stringify(data.data.user))
+        
+        addToast('success', data.data.message || 'Registration successful!')
+        
+        // Redirect to appropriate dashboard
+        setTimeout(() => {
+          window.location.href = data.data.redirectUrl
+        }, 1500)
+      } else {
+        addToast('error', data.error || 'Registration failed')
+      }
+    } catch (error) {
+      console.error('Registration error:', error)
+      addToast('error', 'Network error. Please try again.')
+    } finally {
       setIsLoading(false)
-      // Redirect to appropriate dashboard
-      window.location.href = formData.userType === 'admin' ? '/admin/dashboard' : '/carrier/dashboard'
-    }, 2000)
+    }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-white">
+      <Header />
+      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="flex items-center justify-center mb-8">
-            <div className="w-12 h-12 bg-black rounded flex items-center justify-center">
-              <Truck className="w-6 h-6 text-white" />
+            <div className="w-32 h-12 flex items-center justify-center">
+              <Logo width="180" height="60" className="w-45 h-15" />
             </div>
           </div>
           <h2 className="text-3xl font-light text-gray-900">
@@ -218,8 +255,8 @@ export default function RegisterPage() {
                     id="companyName"
                     name="companyName"
                     type="text"
-                    value={formData.companyName}
-                    onChange={(e) => handleInputChange('companyName', e.target.value)}
+                    value={formData.company}
+                    onChange={(e) => handleInputChange('company', e.target.value)}
                     className="block w-full pl-10 pr-3 py-3 border border-gray-200 placeholder-gray-400 focus:outline-none focus:border-black transition-colors"
                     placeholder="Your company name"
                   />
@@ -340,6 +377,7 @@ export default function RegisterPage() {
             </p>
           </div>
         </div>
+      </div>
       </div>
     </div>
   )

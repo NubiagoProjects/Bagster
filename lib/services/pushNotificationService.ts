@@ -162,8 +162,8 @@ class PushNotificationService {
     if (Notification.permission === 'granted') {
       const options: NotificationOptions = {
         body: notification.body,
-        icon: notification.icon || '/favicon.ico',
-        badge: notification.badge || '/favicon.ico',
+        icon: notification.icon || '/bagster-icon.svg',
+        badge: notification.badge || '/bagster-icon.svg',
         // image: notification.image, // Removed - not supported in NotificationOptions
         data: data,
         requireInteraction: true,
@@ -266,7 +266,7 @@ class PushNotificationService {
     const payload: PushNotificationPayload = {
       title: 'Shipment Update',
       body: `${statusMessages[status as keyof typeof statusMessages] || 'Shipment status updated'} - ${trackingNumber}`,
-      icon: '/favicon.ico',
+      icon: '/bagster-icon.svg',
       data: {
         type: 'shipment_update',
         trackingNumber,
@@ -298,7 +298,7 @@ class PushNotificationService {
     const payload: PushNotificationPayload = {
       title: 'Carrier Assigned',
       body: `${carrierName} has been assigned to your shipment ${trackingNumber}`,
-      icon: '/favicon.ico',
+      icon: '/bagster-icon.svg',
       data: {
         type: 'carrier_assignment',
         trackingNumber,
@@ -320,8 +320,8 @@ class PushNotificationService {
     const payload: PushNotificationPayload = {
       title,
       body: message,
-      icon: '/favicon.ico',
-      badge: priority === 'high' ? '/badge-urgent.png' : '/favicon.ico',
+      icon: '/bagster-icon.svg',
+      badge: priority === 'high' ? '/badge-urgent.png' : '/bagster-icon.svg',
       data: {
         type: 'system_alert',
         priority,
