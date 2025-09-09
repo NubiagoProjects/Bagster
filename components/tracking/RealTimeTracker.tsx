@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { db } from '@/lib/firebase'
-import { doc, onSnapshot } from 'firebase/firestore'
+// Firebase disabled - using mock data
+// import { db } from '@/lib/firebase'
+// import { doc, onSnapshot, collection, query, where, orderBy, getDocs } from 'firebase/firestore'
 import { Package, MapPin, Clock, CheckCircle, AlertCircle, Truck } from 'lucide-react'
 
 interface TrackingEvent {
@@ -65,41 +66,62 @@ export default function RealTimeTracker({ trackingNumber, className = '' }: Real
     setLoading(true)
     setError(null)
 
-    // Real-time listener for shipment updates
-    const unsubscribe = onSnapshot(
-      doc(db, 'shipments', trackingNumber),
-      (doc) => {
-        if (doc.exists()) {
-          const data = doc.data()
-          setShipmentData({
-            id: doc.id,
-            trackingNumber: data.trackingNumber,
-            status: data.status,
-            originAddress: data.originAddress,
-            destinationAddress: data.destinationAddress,
-            estimatedDelivery: data.estimatedDelivery?.toDate(),
-            actualDelivery: data.actualDelivery?.toDate(),
-            carrierName: data.carrierName || 'Unknown Carrier',
-            events: data.events?.map((event: any) => ({
-              ...event,
-              timestamp: event.timestamp?.toDate() || new Date()
-            })) || []
-          })
-          setIsConnected(true)
-        } else {
-          setError('Shipment not found')
-        }
-        setLoading(false)
-      },
-      (error) => {
-        console.error('Real-time tracking error:', error)
-        setError('Failed to connect to tracking service')
-        setIsConnected(false)
-        setLoading(false)
+    const loadTrackingEvents = async (trackingId: string) => {
+      try {
+        // Mock tracking events for testing (Firebase disabled)
+        const mockEvents: TrackingEvent[] = [
+          {
+            id: '1',
+            status: 'picked_up',
+            location: 'Lagos, Nigeria',
+            timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
+            description: 'Package picked up from sender',
+            carrierName: 'FastTrack Logistics'
+          },
+          {
+            id: '2',
+            status: 'in_transit',
+            location: 'Ibadan, Nigeria',
+            timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000),
+            description: 'Package in transit - passed through sorting facility',
+            carrierName: 'FastTrack Logistics'
+          },
+          {
+            id: '3',
+            status: 'in_transit',
+            location: 'En route to Abuja',
+            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+            description: 'Package on delivery vehicle',
+            carrierName: 'FastTrack Logistics'
+          }
+        ]
+        
+        setShipmentData({
+          id: 'mock_shipment_001',
+          trackingNumber: trackingNumber,
+          status: 'in_transit',
+          originAddress: {
+            street: 'Lagos, Nigeria'
+          },
+          destinationAddress: {
+            street: 'Abuja, Nigeria'
+          },
+          estimatedDelivery: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+          carrierName: 'FastTrack Logistics',
+          events: mockEvents
+        })
+      } catch (error) {
+        console.error('Error loading tracking events:', error)
       }
-    )
+    }
 
-    return () => unsubscribe()
+    loadTrackingEvents(trackingNumber)
+
+    // Simulate loading delay
+    setTimeout(() => {
+      setLoading(false)
+    }, 1000)
+
   }, [trackingNumber])
 
   if (loading) {
