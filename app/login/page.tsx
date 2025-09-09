@@ -97,8 +97,8 @@ export default function LoginPage() {
           <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-xs text-blue-700 font-medium mb-2">Test Accounts:</p>
             <div className="text-xs text-blue-600 space-y-1">
-              <div><strong>Carrier:</strong> carrier@test.com / carrier123</div>
-              <div><strong>Admin:</strong> admin@test.com / admin123</div>
+              <div><strong>Carrier:</strong> carrier@bagster.com / carrier123</div>
+              <div><strong>Admin:</strong> admin@bagster.com / admin123</div>
             </div>
           </div>
         </div>
