@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { db } from '@/lib/firebase'
-import { collection, query, where, orderBy, getDocs, limit, startAfter, DocumentSnapshot } from 'firebase/firestore'
+// Firebase disabled - using mock data
+// import { db } from '@/lib/firebase'
+// import { collection, query, where, orderBy, limit, getDocs, startAfter, DocumentSnapshot } from 'firebase/firestore'
 import { Search, Filter, MapPin, Star, Truck, Package, Clock, ChevronDown, X } from 'lucide-react'
 
 interface Carrier {
@@ -73,41 +74,81 @@ export default function AdvancedCarrierSearch({ onCarrierSelect, className = '' 
   const [filters, setFilters] = useState<SearchFilters>(defaultFilters)
   const [loading, setLoading] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
-  const [lastDoc, setLastDoc] = useState<DocumentSnapshot | null>(null)
+  const [lastDoc, setLastDoc] = useState<any | null>(null)
   const [hasMore, setHasMore] = useState(true)
 
-  // Load carriers from Firestore
+  // Load carriers - using mock data (Firebase disabled)
   const loadCarriers = async (isLoadMore = false) => {
     setLoading(true)
     try {
-      let q = query(
-        collection(db, 'carriers'),
-        orderBy(filters.sortBy, filters.sortOrder),
-        limit(20)
-      )
+      // Mock carrier data for testing
+      const mockCarriers: Carrier[] = [
+        {
+          id: '1',
+          name: 'FastTrack Logistics',
+          email: 'contact@fasttrack.com',
+          phone: '+1-555-0123',
+          rating: 4.8,
+          totalShipments: 234,
+          activeRoutes: ['Lagos-Abuja', 'Lagos-Port Harcourt'],
+          serviceAreas: ['Local', 'Regional'],
+          vehicleTypes: ['Van', 'Truck'],
+          priceRange: 'standard',
+          specializations: ['Express Delivery', 'Fragile Items'],
+          isVerified: true,
+          isActive: true,
+          joinedAt: new Date(),
+          lastActive: new Date()
+        },
+        {
+          id: '2',
+          name: 'Express Delivery Co',
+          email: 'info@expressdelivery.com',
+          phone: '+1-555-0456',
+          rating: 4.6,
+          totalShipments: 189,
+          activeRoutes: ['Nairobi-Mombasa', 'Nairobi-Kisumu'],
+          serviceAreas: ['Regional', 'National'],
+          vehicleTypes: ['Motorcycle', 'Van'],
+          priceRange: 'budget',
+          specializations: ['Same-day Delivery', 'Local Routes'],
+          isVerified: true,
+          isActive: true,
+          joinedAt: new Date(),
+          lastActive: new Date()
+        },
+        {
+          id: '3',
+          name: 'Swift Transport',
+          email: 'hello@swifttransport.com',
+          phone: '+1-555-0789',
+          rating: 4.7,
+          totalShipments: 156,
+          activeRoutes: ['Accra-Kumasi', 'Accra-Tamale'],
+          serviceAreas: ['Local', 'National'],
+          vehicleTypes: ['Truck', 'Trailer'],
+          priceRange: 'premium',
+          specializations: ['Heavy Cargo', 'Long Distance'],
+          isVerified: true,
+          isActive: true,
+          joinedAt: new Date(),
+          lastActive: new Date()
+        }
+      ]
 
-      if (isLoadMore && lastDoc) {
-        q = query(q, startAfter(lastDoc))
-      }
-
-      const snapshot = await getDocs(q)
-      const newCarriers = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        joinedAt: doc.data().joinedAt?.toDate() || new Date(),
-        lastActive: doc.data().lastActive?.toDate() || new Date()
-      })) as Carrier[]
+      await new Promise(resolve => setTimeout(resolve, 500)) // Simulate loading
 
       if (isLoadMore) {
-        setCarriers(prev => [...prev, ...newCarriers])
+        setCarriers(prev => [...prev, ...mockCarriers])
       } else {
-        setCarriers(newCarriers)
+        setCarriers(mockCarriers)
       }
 
-      setLastDoc(snapshot.docs[snapshot.docs.length - 1] || null)
-      setHasMore(snapshot.docs.length === 20)
+      setHasMore(false) // No more data for mock
+      setLastDoc(null)
+
     } catch (error) {
-      console.error('Failed to load carriers:', error)
+      console.error('Error loading carriers:', error)
     } finally {
       setLoading(false)
     }
