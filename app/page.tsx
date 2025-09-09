@@ -13,59 +13,158 @@ export default function HomePage() {
     <div className="min-h-screen">
       <HomepageHeader />
 
-      {/* Tesla-style Hero Section */}
-      <section className="relative min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/cargo-ship.jpg')] bg-cover bg-center opacity-20"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/40 to-slate-900/60"></div>
-        
-        <div className="relative z-10 container mx-auto px-6 py-32 text-center">
-          <div className="mb-8">
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-sm font-medium mb-6">
-              <Image src="/luggage-icon.svg" alt="Bagster" width={16} height={16} className="w-4 h-4 mr-2" />
-              Africa's Leading Logistics Platform
-            </div>
-          </div>
-          
-          <h1 className="text-5xl lg:text-7xl font-light leading-tight tracking-tight mb-8">
-            Smart Cargo
-            <span className="block font-normal text-brand-primary">for Africa</span>
-          </h1>
-          <p className="text-xl lg:text-2xl font-light max-w-3xl mx-auto leading-relaxed opacity-90 mb-12">
-            Connect shippers with trusted carriers across Africa. Fast, reliable, and cost-effective cargo solutions.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
-            <Link href="/shipments">
-              <Button size="lg" className="bg-brand-primary text-white hover:bg-blue-700 px-12 py-4 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300">
-                Ship Your Cargo
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button variant="outline" size="lg" className="border-2 border-brand-primary text-brand-primary bg-transparent hover:bg-brand-primary hover:text-white px-12 py-4 text-lg font-medium transition-all duration-300">
-                Become a Carrier
-              </Button>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-3 gap-12 pt-20 max-w-2xl mx-auto">
-            <div className="text-center">
-              <div className="text-4xl font-light text-white">10K+</div>
-              <div className="text-white/80 font-light text-sm uppercase tracking-wider">Shipments</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-light text-white">500+</div>
-              <div className="text-white/80 font-light text-sm uppercase tracking-wider">Carriers</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-light text-white">25</div>
-              <div className="text-white/80 font-light text-sm uppercase tracking-wider">Countries</div>
-            </div>
+      {/* Professional Hero Section */}
+      <section className="relative min-h-screen bg-white overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white">
+          <div className="absolute inset-0 opacity-5">
+            <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                  <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#004aac" strokeWidth="0.5"/>
+                </pattern>
+              </defs>
+              <rect width="100" height="100" fill="url(#grid)" />
+            </svg>
           </div>
         </div>
         
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce">
-          <ChevronRight className="w-6 h-6 rotate-90" />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="pt-32 pb-20">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              {/* Left Column - Content */}
+              <div className="space-y-8">
+                <div className="space-y-6">
+                  <div className="inline-flex items-center px-4 py-2 rounded-full bg-brand-primary/5 border border-brand-primary/10 text-brand-primary text-sm font-medium">
+                    <Globe className="w-4 h-4 mr-2" />
+                    Trusted by 10,000+ Businesses Across Africa
+                  </div>
+                  
+                  <h1 className="text-4xl lg:text-6xl font-light text-gray-900 leading-tight">
+                    Africa's Most
+                    <span className="block font-medium text-brand-primary">Reliable Logistics</span>
+                    <span className="block font-light">Marketplace</span>
+                  </h1>
+                  
+                  <p className="text-xl text-gray-600 font-light leading-relaxed max-w-xl">
+                    Connect with verified carriers across 25+ African countries. Ship faster, track smarter, and grow your business with confidence.
+                  </p>
+                </div>
+
+                {/* Key Benefits */}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-700 font-medium">Real-time tracking & updates</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-700 font-medium">Full insurance coverage included</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-700 font-medium">Verified carriers & competitive rates</span>
+                  </div>
+                </div>
+                
+                {/* CTA Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                  <Link href="/shipments">
+                    <Button size="lg" className="bg-brand-primary text-white hover:bg-blue-700 px-8 py-4 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 group">
+                      Ship Your Cargo
+                      <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
+                  <Link href="/register">
+                    <Button variant="outline" size="lg" className="border-2 border-gray-300 text-gray-700 bg-white hover:bg-gray-50 px-8 py-4 text-lg font-medium transition-all duration-300">
+                      Become a Carrier
+                    </Button>
+                  </Link>
+                </div>
+
+                {/* Trust Indicators */}
+                <div className="pt-8 border-t border-gray-100">
+                  <p className="text-sm text-gray-500 mb-4">Trusted by leading companies across Africa</p>
+                  <div className="flex items-center space-x-8 opacity-60">
+                    <div className="text-lg font-semibold text-gray-400">TechCorp</div>
+                    <div className="text-lg font-semibold text-gray-400">AfriTrade</div>
+                    <div className="text-lg font-semibold text-gray-400">LogiFlow</div>
+                    <div className="text-lg font-semibold text-gray-400">CargoMax</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column - Stats & Visual */}
+              <div className="space-y-8">
+                {/* Stats Grid */}
+                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+                  <div className="grid grid-cols-2 gap-8">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-brand-primary mb-2">10,000+</div>
+                      <div className="text-gray-600 font-medium">Successful Shipments</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-brand-primary mb-2">500+</div>
+                      <div className="text-gray-600 font-medium">Verified Carriers</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-brand-primary mb-2">25+</div>
+                      <div className="text-gray-600 font-medium">African Countries</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-brand-primary mb-2">99.8%</div>
+                      <div className="text-gray-600 font-medium">On-time Delivery</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Feature Highlights */}
+                <div className="space-y-4">
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+                    <div className="flex items-start space-x-4">
+                      <div className="w-12 h-12 bg-brand-primary rounded-lg flex items-center justify-center">
+                        <Shield className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 mb-2">Secure & Insured</h3>
+                        <p className="text-gray-600 text-sm">Full cargo protection with comprehensive insurance coverage</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100">
+                    <div className="flex items-start space-x-4">
+                      <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
+                        <Clock className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 mb-2">Real-time Tracking</h3>
+                        <p className="text-gray-600 text-sm">Monitor your shipments with live GPS tracking and updates</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl p-6 border border-purple-100">
+                    <div className="flex items-start space-x-4">
+                      <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
+                        <BarChart3 className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 mb-2">Smart Analytics</h3>
+                        <p className="text-gray-600 text-sm">Data-driven insights to optimize your logistics operations</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
