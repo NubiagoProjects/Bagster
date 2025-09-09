@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 import { 
   Truck, 
   Package, 
