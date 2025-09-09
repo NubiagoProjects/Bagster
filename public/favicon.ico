@@ -1,1 +1,13 @@
-<!-- This is a placeholder for favicon.ico - will be replaced with actual luggage icon -->
+<svg width="32" height="32" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <rect x="16" y="28" width="20" height="28" rx="2" ry="2" stroke="#004aac" stroke-width="2" fill="none"/>
+  <rect x="20" y="22" width="12" height="8" rx="1" ry="1" stroke="#004aac" stroke-width="2" fill="none"/>
+  <line x1="20" y1="36" x2="32" y2="36" stroke="#004aac" stroke-width="1"/>
+  <line x1="20" y1="44" x2="32" y2="44" stroke="#004aac" stroke-width="1"/>
+  <rect x="32" y="34" width="16" height="22" rx="2" ry="2" stroke="#004aac" stroke-width="2" fill="none"/>
+  <rect x="35" y="30" width="10" height="6" rx="1" ry="1" stroke="#004aac" stroke-width="2" fill="none"/>
+  <rect x="38" y="40" width="4" height="3" rx="0.5" ry="0.5" fill="#004aac"/>
+  <circle cx="39" cy="48" r="0.8" fill="#004aac"/>
+  <circle cx="42" cy="48" r="0.8" fill="#004aac"/>
+  <path d="M8 8 L14 11 L17 8 L20 11 L14 14 L11 17 L8 14 Z" stroke="#004aac" stroke-width="1.5" fill="none"/>
+  <path d="M20 11 Q28 8 36 14" stroke="#004aac" stroke-width="1.5" fill="none" stroke-dasharray="2,1"/>
+</svg>
