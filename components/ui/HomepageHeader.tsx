@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Menu, Truck } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import { Button } from './Button'
+import Image from 'next/image'
 
 export default function HomepageHeader() {
   return (
@@ -12,10 +13,16 @@ export default function HomepageHeader() {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-black rounded flex items-center justify-center">
-                <Truck className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 bg-white rounded-md border border-gray-200 flex items-center justify-center">
+                <Image 
+                  src="/luggage-icon.svg" 
+                  alt="Bagster Logo" 
+                  width={32} 
+                  height={32}
+                  className="w-8 h-8"
+                />
               </div>
-              <span className="text-xl font-bold text-black">Bagster</span>
+              <span className="text-xl font-brand font-bold text-brand-primary">Bagster</span>
             </Link>
             <div className="hidden md:flex space-x-8">
               <Link href="/shipments" className="text-gray-900 hover:text-gray-600 font-medium transition-colors">Ship</Link>
@@ -31,7 +38,7 @@ export default function HomepageHeader() {
               </Button>
             </Link>
             <Link href="/register">
-              <Button className="bg-black text-white hover:bg-gray-800 px-6">
+              <Button className="bg-brand-primary text-white hover:bg-blue-700 px-6">
                 Get Started
               </Button>
             </Link>

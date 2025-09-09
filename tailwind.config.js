@@ -8,6 +8,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        'brand-primary': '#004aac',
+        'brand-secondary': '#000000',
+        'brand-blue': '#004aac',
+        'brand-black': '#000000',
         // Premium Blue Palette
         blue: {
           50: '#eff6ff',
@@ -108,6 +112,7 @@ module.exports = {
         },
       },
       fontFamily: {
+        'brand': ['Esportica', 'Inter', 'sans-serif'],
         sans: ['Inter', 'Poppins', 'system-ui', 'sans-serif'],
         display: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
       },

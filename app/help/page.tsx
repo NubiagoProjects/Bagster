@@ -98,7 +98,7 @@ export default function HelpPage() {
           <Breadcrumb />
           <div className="text-center mb-16">
             <div className="flex items-center justify-center mb-8">
-              <div className="w-12 h-12 bg-black rounded flex items-center justify-center">
+              <div className="w-12 h-12 bg-brand-primary rounded flex items-center justify-center">
                 <BookOpen className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -149,7 +149,7 @@ export default function HelpPage() {
                   <ul className="space-y-2">
                     {category.articles.map((article, articleIndex) => (
                       <li key={articleIndex}>
-                        <a href="/faq" className="text-gray-600 hover:text-black text-sm font-light transition-colors duration-200">
+                        <a href="/faq" className="text-gray-600 hover:text-brand-primary text-sm font-light transition-colors duration-200">
                           {article}
                         </a>
                       </li>
@@ -179,7 +179,7 @@ export default function HelpPage() {
               <div key={index} className="bg-white border border-gray-200 p-6">
                 <details className="group">
                   <summary className="flex items-center justify-between cursor-pointer">
-                    <h3 className="text-lg font-light text-gray-900 group-open:text-black">
+                    <h3 className="text-lg font-light text-gray-900 group-open:text-brand-primary">
                       {faq.question}
                     </h3>
                     <ChevronDown className="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform duration-200" />

@@ -101,7 +101,7 @@ export default function CareersPage() {
           <Breadcrumb />
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-6xl font-light text-gray-900 mb-6">
-              Join Our <span className="text-black">Mission</span>
+              Join Our <span className="text-brand-primary">Mission</span>
             </h1>
             <p className="text-xl text-gray-600 font-light max-w-3xl mx-auto leading-relaxed">
               Help us revolutionize African logistics and connect the continent through innovative technology and passionate teamwork.
@@ -163,7 +163,7 @@ export default function CareersPage() {
                       </span>
                     </div>
                   </div>
-                  <button className="bg-black text-white px-6 py-3 font-light hover:bg-gray-800 transition-colors mt-4 md:mt-0">
+                  <button className="bg-brand-primary text-white px-6 py-3 font-light hover:bg-gray-800 transition-colors mt-4 md:mt-0">
                     Apply Now
                     <ArrowRight className="w-4 h-4 ml-2 inline" />
                   </button>
@@ -204,7 +204,7 @@ export default function CareersPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {benefits.map((benefit, index) => (
               <div key={index} className="text-center">
-                <div className="w-12 h-12 bg-black rounded flex items-center justify-center mx-auto mb-4 text-white">
+                <div className="w-12 h-12 bg-brand-primary rounded flex items-center justify-center mx-auto mb-4 text-white">
                   {benefit.icon}
                 </div>
                 <h3 className="text-lg font-light text-gray-900 mb-2">{benefit.title}</h3>
@@ -248,13 +248,13 @@ export default function CareersPage() {
             </div>
             <div className="bg-white border border-gray-200 rounded-lg p-8">
               <div className="flex items-center mb-6">
-                <Users className="w-8 h-8 text-black mr-3" />
+                <Users className="w-8 h-8 text-brand-primary mr-3" />
                 <h3 className="text-xl font-light text-gray-900">Join Our Team</h3>
               </div>
               <p className="text-gray-600 font-light mb-6 leading-relaxed">
                 Don't see a position that fits? We're always looking for talented individuals who share our passion for transforming African logistics.
               </p>
-              <button className="bg-black text-white px-6 py-3 font-light hover:bg-gray-800 transition-colors w-full">
+              <button className="bg-brand-primary text-white px-6 py-3 font-light hover:bg-gray-800 transition-colors w-full">
                 Send Us Your Resume
               </button>
             </div>

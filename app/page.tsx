@@ -20,15 +20,15 @@ export default function HomePage() {
         
         <div className="relative z-10 container mx-auto px-6 py-32 text-center">
           <div className="mb-8">
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm font-medium mb-6">
-              <Truck className="w-4 h-4 mr-2" />
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-sm font-medium mb-6">
+              <Image src="/luggage-icon.svg" alt="Bagster" width={16} height={16} className="w-4 h-4 mr-2" />
               Africa's Leading Logistics Platform
             </div>
           </div>
           
           <h1 className="text-5xl lg:text-7xl font-light leading-tight tracking-tight mb-8">
             Smart Cargo
-            <span className="block font-normal text-blue-400">for Africa</span>
+            <span className="block font-normal text-brand-primary">for Africa</span>
           </h1>
           <p className="text-xl lg:text-2xl font-light max-w-3xl mx-auto leading-relaxed opacity-90 mb-12">
             Connect shippers with trusted carriers across Africa. Fast, reliable, and cost-effective cargo solutions.
@@ -36,12 +36,12 @@ export default function HomePage() {
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
             <Link href="/shipments">
-              <Button size="lg" className="bg-blue-600 text-white hover:bg-blue-700 px-12 py-4 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300">
+              <Button size="lg" className="bg-brand-primary text-white hover:bg-blue-700 px-12 py-4 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300">
                 Ship Your Cargo
               </Button>
             </Link>
             <Link href="/register">
-              <Button variant="outline" size="lg" className="border-2 border-blue-400 text-blue-400 bg-transparent hover:bg-blue-400 hover:text-white px-12 py-4 text-lg font-medium transition-all duration-300">
+              <Button variant="outline" size="lg" className="border-2 border-brand-primary text-brand-primary bg-transparent hover:bg-brand-primary hover:text-white px-12 py-4 text-lg font-medium transition-all duration-300">
                 Become a Carrier
               </Button>
             </Link>
@@ -83,7 +83,7 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white p-8 rounded-sm shadow-sm hover:shadow-md transition-shadow duration-200">
-              <div className="w-12 h-12 bg-black rounded-sm flex items-center justify-center mb-6">
+              <div className="w-12 h-12 bg-brand-primary rounded-sm flex items-center justify-center mb-6">
                 <Globe className="h-6 w-6 text-white" />
               </div>
               <h3 className="text-xl font-medium text-gray-900 mb-3">Pan-African Network</h3>
@@ -93,7 +93,7 @@ export default function HomePage() {
             </div>
 
             <div className="bg-white p-8 rounded-sm shadow-sm hover:shadow-md transition-shadow duration-200">
-              <div className="w-12 h-12 bg-black rounded-sm flex items-center justify-center mb-6">
+              <div className="w-12 h-12 bg-brand-primary rounded-sm flex items-center justify-center mb-6">
                 <Shield className="h-6 w-6 text-white" />
               </div>
               <h3 className="text-xl font-medium text-gray-900 mb-3">Secure & Insured</h3>
@@ -103,7 +103,7 @@ export default function HomePage() {
             </div>
 
             <div className="bg-white p-8 rounded-sm shadow-sm hover:shadow-md transition-shadow duration-200">
-              <div className="w-12 h-12 bg-black rounded-sm flex items-center justify-center mb-6">
+              <div className="w-12 h-12 bg-brand-primary rounded-sm flex items-center justify-center mb-6">
                 <Zap className="h-6 w-6 text-white" />
               </div>
               <h3 className="text-xl font-medium text-gray-900 mb-3">Real-time Tracking</h3>
@@ -230,10 +230,10 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center">
-                  <Truck className="w-6 h-6 text-black" />
+                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border border-gray-200">
+                  <Image src="/luggage-icon.svg" alt="Bagster" width={24} height={24} className="w-6 h-6" />
                 </div>
-                <span className="text-xl font-bold">Bagster</span>
+                <span className="text-xl font-brand font-bold text-brand-primary">Bagster</span>
               </div>
               <p className="text-slate-400 max-w-xs">
                 Africa's leading cargo marketplace connecting shippers with trusted carriers.

@@ -194,7 +194,7 @@ export default function ApiPage() {
           <Breadcrumb />
           <div className="text-center">
             <div className="flex items-center justify-center mb-8">
-              <div className="w-12 h-12 bg-black rounded flex items-center justify-center">
+              <div className="w-12 h-12 bg-brand-primary rounded flex items-center justify-center">
                 <Code className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -441,7 +441,7 @@ export default function ApiPage() {
                 <h3 className="font-light">JavaScript/Node.js</h3>
               </div>
               <p className="text-gray-600 font-light mb-4">Official SDK for JavaScript and Node.js applications</p>
-              <a href="#" className="text-gray-900 hover:text-black font-light">
+              <a href="#" className="text-gray-900 hover:text-brand-primary font-light">
                 View Documentation →
               </a>
             </div>
@@ -452,7 +452,7 @@ export default function ApiPage() {
                 <h3 className="font-light">Python</h3>
               </div>
               <p className="text-gray-600 font-light mb-4">Python SDK for easy integration with Python applications</p>
-              <a href="#" className="text-gray-900 hover:text-black font-light">
+              <a href="#" className="text-gray-900 hover:text-brand-primary font-light">
                 View Documentation →
               </a>
             </div>
@@ -463,7 +463,7 @@ export default function ApiPage() {
                 <h3 className="font-light">PHP</h3>
               </div>
               <p className="text-gray-600 font-light mb-4">PHP library for integrating with PHP-based platforms</p>
-              <a href="#" className="text-gray-900 hover:text-black font-light">
+              <a href="#" className="text-gray-900 hover:text-brand-primary font-light">
                 View Documentation →
               </a>
             </div>

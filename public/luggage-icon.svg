@@ -1,0 +1,18 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="6" fill="white"/>
+  <g transform="translate(4, 4)">
+    <!-- Luggage icon based on user's image -->
+    <path d="M6 4h4V2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="#004aac" stroke="#000000" stroke-width="0.5"/>
+    <rect x="12" y="2" width="2" height="2" fill="#004aac"/>
+    <path d="M6 8h12M6 12h12" stroke="#000000" stroke-width="0.5"/>
+    <!-- Handle -->
+    <path d="M8 4V2a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" stroke="#000000" stroke-width="0.5" fill="none"/>
+    <!-- Wheels -->
+    <circle cx="6" cy="19" r="1.5" fill="#000000"/>
+    <circle cx="18" cy="19" r="1.5" fill="#000000"/>
+    <!-- Suitcase details -->
+    <rect x="16" y="10" width="2" height="1" fill="#000000"/>
+    <rect x="16" y="12" width="1" height="1" fill="#000000"/>
+    <rect x="16" y="14" width="1" height="1" fill="#000000"/>
+  </g>
+</svg>
