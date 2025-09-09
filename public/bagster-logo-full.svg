@@ -1,0 +1,53 @@
+<svg width="400" height="120" viewBox="0 0 400 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Luggage Icon -->
+  <g transform="translate(10, 20)">
+    <!-- Suitcase body -->
+    <rect x="10" y="25" width="28" height="35" rx="3" ry="3" stroke="currentColor" stroke-width="2.5" fill="none"/>
+    
+    <!-- Suitcase handle -->
+    <rect x="15" y="18" width="18" height="12" rx="2" ry="2" stroke="currentColor" stroke-width="2.5" fill="none"/>
+    
+    <!-- Suitcase details -->
+    <line x1="15" y1="38" x2="33" y2="38" stroke="currentColor" stroke-width="1.5"/>
+    <line x1="15" y1="48" x2="33" y2="48" stroke="currentColor" stroke-width="1.5"/>
+    
+    <!-- Second suitcase -->
+    <rect x="30" y="32" width="24" height="28" rx="2" ry="2" stroke="currentColor" stroke-width="2.5" fill="none"/>
+    <rect x="34" y="28" width="16" height="8" rx="1" ry="1" stroke="currentColor" stroke-width="2.5" fill="none"/>
+    
+    <!-- Suitcase details for second bag -->
+    <rect x="40" y="40" width="6" height="4" rx="1" ry="1" fill="currentColor"/>
+    <circle cx="41" cy="50" r="1" fill="currentColor"/>
+    <circle cx="45" cy="50" r="1" fill="currentColor"/>
+    
+    <!-- Airplane -->
+    <path d="M8 8 L16 12 L20 8 L24 12 L16 16 L12 20 L8 16 Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+    
+    <!-- Airplane trail -->
+    <path d="M24 12 Q35 8 45 16" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="2,1"/>
+  </g>
+  
+  <!-- Bagster Text -->
+  <g transform="translate(80, 20)">
+    <!-- B -->
+    <path d="M0 0 L0 80 L40 80 Q55 80 55 65 Q55 50 40 50 L40 50 Q50 50 50 35 Q50 20 35 20 L0 20 Z M15 35 L35 35 Q40 35 40 42.5 Q40 50 35 50 L15 50 Z M15 20 L30 20 Q35 20 35 27.5 Q35 35 30 35 L15 35 Z" fill="currentColor"/>
+    
+    <!-- a -->
+    <path d="M70 30 Q85 25 100 30 Q110 35 110 50 L110 80 L95 80 L95 75 Q90 80 80 80 Q65 80 65 65 Q65 50 80 50 L95 50 L95 45 Q95 40 85 40 Q75 40 70 45 Z M80 65 Q85 65 90 62.5 Q95 60 95 55 L95 60 L85 60 Q80 60 80 65 Z" fill="currentColor"/>
+    
+    <!-- g -->
+    <path d="M125 30 Q140 25 155 30 Q165 35 165 50 L165 95 Q165 110 150 110 Q135 110 125 105 L125 95 Q130 100 145 100 Q150 100 150 95 L150 85 Q145 90 135 90 Q120 90 120 75 Q120 60 135 60 Q145 60 150 65 L150 50 Q150 45 140 45 Q130 45 125 50 Z M135 75 Q140 75 145 72.5 Q150 70 150 65 L150 70 Q150 75 145 75 Q140 75 135 75 Z" fill="currentColor"/>
+    
+    <!-- s -->
+    <path d="M180 35 Q185 30 195 30 Q210 30 215 40 L205 45 Q202.5 40 195 40 Q190 40 185 42.5 Q180 45 180 50 Q180 55 185 57.5 Q190 60 200 60 Q215 60 220 70 Q220 80 205 80 Q185 80 180 70 L190 65 Q192.5 70 200 70 Q205 70 210 67.5 Q215 65 215 60 Q215 55 210 52.5 Q205 50 195 50 Q180 50 180 42.5 Q180 35 180 35 Z" fill="currentColor"/>
+    
+    <!-- t -->
+    <path d="M235 15 L235 30 L250 30 L250 40 L235 40 L235 65 Q235 70 240 70 L250 70 L250 80 L235 80 Q220 80 220 65 L220 40 L210 40 L210 30 L220 30 L220 15 Z" fill="currentColor"/>
+    
+    <!-- e -->
+    <path d="M265 30 Q280 25 295 30 Q305 35 305 50 Q305 55 300 55 L280 55 Q280 60 285 62.5 Q290 65 295 65 Q305 65 310 60 L315 70 Q310 75 300 77.5 Q290 80 280 80 Q265 80 265 65 Q265 50 280 50 Q295 50 295 45 Q295 40 285 40 Q275 40 265 45 Z M280 50 L290 50 Q290 45 285 45 Q280 45 280 50 Z" fill="currentColor"/>
+    
+    <!-- r -->
+    <path d="M330 30 L330 80 L315 80 L315 30 L330 30 Z M330 45 Q335 40 345 40 Q360 40 365 50 L355 55 Q352.5 50 345 50 Q340 50 335 52.5 Q330 55 330 60 Z" fill="currentColor"/>
+  </g>
+</svg>
