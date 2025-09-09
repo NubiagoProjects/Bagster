@@ -1,0 +1,60 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read/write their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && request.auth.token.role == 'admin';
+    }
+    
+    // Carriers collection - public read, authenticated write
+    match /carriers/{carrierId} {
+      allow read: if true; // Public for browsing
+      allow write: if request.auth != null && 
+                     (request.auth.token.role == 'carrier' || 
+                      request.auth.token.role == 'admin');
+    }
+    
+    // Carrier routes sub-collection
+    match /carriers/{carrierId}/routes/{routeId} {
+      allow read: if true; // Public for browsing
+      allow write: if request.auth != null && 
+                     (request.auth.uid == carrierId ||
+                      request.auth.token.role == 'admin');
+    }
+    
+    // Shipments - role-based access
+    match /shipments/{shipmentId} {
+      allow read: if request.auth != null && 
+                    (request.auth.uid == resource.data.clientId ||
+                     request.auth.uid == resource.data.carrierId ||
+                     request.auth.uid == resource.data.supplierId ||
+                     request.auth.token.role == 'admin');
+      
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && 
+                      (request.auth.uid == resource.data.carrierId ||
+                       request.auth.token.role == 'admin');
+    }
+    
+    // Tracking sub-collection
+    match /shipments/{shipmentId}/tracking/{trackingId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && 
+                      request.auth.token.role in ['carrier', 'admin'];
+    }
+    
+    // Analytics and reports
+    match /analytics/{docId} {
+      allow read, write: if request.auth != null && 
+                          request.auth.token.role == 'admin';
+    }
+    
+    // System settings
+    match /settings/{settingId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+                     request.auth.token.role == 'admin';
+    }
+  }
+}

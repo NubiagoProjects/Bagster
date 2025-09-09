@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "NEXT_PUBLIC_FIREBASE_API_KEY": "AIzaSyDUYNJrwRrKyYr_Rl27k7LFL3t4hDiAG9I",
+    "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN": "bagster-d51eb.firebaseapp.com",
+    "NEXT_PUBLIC_FIREBASE_PROJECT_ID": "bagster-d51eb",
+    "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET": "bagster-d51eb.firebasestorage.app",
+    "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "28733205556",
+    "NEXT_PUBLIC_FIREBASE_APP_ID": "1:28733205556:web:c6d4818ce2a02db0fd2e61",
+    "NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID": "G-GMQXH9W72N"
+  },
+  "rewrites": [
+    {
+      "source": "/api/v1/(.*)",
+      "destination": "/api/v1/$1"
+    }
+  ]
+}
