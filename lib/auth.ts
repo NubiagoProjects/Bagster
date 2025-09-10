@@ -71,31 +71,41 @@ class AuthService {
   }
 
   private initializeAuth() {
-    onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          const userData = await this.getUserData(firebaseUser.uid);
-          this.updateAuthState({
-            user: userData,
-            isAuthenticated: true,
-            loading: false
-          });
-        } catch (error) {
-          console.error('Error fetching user data:', error);
+    // Only initialize auth listener if Firebase auth is available
+    if (auth && typeof onAuthStateChanged === 'function') {
+      onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          try {
+            const userData = await this.getUserData(firebaseUser.uid);
+            this.updateAuthState({
+              user: userData,
+              isAuthenticated: true,
+              loading: false
+            });
+          } catch (error) {
+            console.error('Error fetching user data:', error);
+            this.updateAuthState({
+              user: null,
+              isAuthenticated: false,
+              loading: false
+            });
+          }
+        } else {
           this.updateAuthState({
             user: null,
             isAuthenticated: false,
             loading: false
           });
         }
-      } else {
-        this.updateAuthState({
-          user: null,
-          isAuthenticated: false,
-          loading: false
-        });
-      }
-    });
+      });
+    } else {
+      // Firebase not available, set default state
+      this.updateAuthState({
+        user: null,
+        isAuthenticated: false,
+        loading: false
+      });
+    }
   }
 
   private updateAuthState(newState: AuthState) {
@@ -115,6 +125,10 @@ class AuthService {
   }
 
   public async login(credentials: LoginCredentials): Promise<User> {
+    if (!auth || !signInWithEmailAndPassword) {
+      throw new Error('Authentication service not available');
+    }
+    
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth, 
@@ -126,7 +140,9 @@ class AuthService {
       
       // Generate JWT token
       const token = this.generateJWT(userData);
-      localStorage.setItem('authToken', token);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('authToken', token);
+      }
       
       return userData;
     } catch (error: any) {
@@ -135,6 +151,10 @@ class AuthService {
   }
 
   public async register(data: RegisterData): Promise<User> {
+    if (!auth || !createUserWithEmailAndPassword) {
+      throw new Error('Authentication service not available');
+    }
+    
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
