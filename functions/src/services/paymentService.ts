@@ -112,36 +112,95 @@ export class PaymentService {
   }
 
   private async processCardPayment(paymentData: any): Promise<boolean> {
-    // Simulate card payment processing
-    // In production, integrate with Stripe, PayPal, etc.
-    const { cardNumber, expiryDate, cvv, amount } = paymentData;
-    
-    // Basic validation
-    if (!cardNumber || !expiryDate || !cvv || !amount) {
+    try {
+      // Real Stripe integration
+      const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+      
+      const { cardNumber, expiryMonth, expiryYear, cvv, amount, currency = 'usd' } = paymentData;
+      
+      // Create payment method
+      const paymentMethod = await stripe.paymentMethods.create({
+        type: 'card',
+        card: {
+          number: cardNumber,
+          exp_month: expiryMonth,
+          exp_year: expiryYear,
+          cvc: cvv,
+        },
+      });
+
+      // Create payment intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: currency.toLowerCase(),
+        payment_method: paymentMethod.id,
+        confirm: true,
+        return_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/success`,
+      });
+
+      return paymentIntent.status === 'succeeded';
+    } catch (error) {
+      console.error('Stripe payment error:', error);
       return false;
     }
-
-    // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Simulate 95% success rate
-    return Math.random() > 0.05;
   }
 
   private async processMobileMoneyPayment(paymentData: any): Promise<boolean> {
-    // Simulate mobile money payment processing
-    // In production, integrate with MTN Mobile Money, Airtel Money, etc.
-    const { phoneNumber, provider, amount } = paymentData;
-    
-    if (!phoneNumber || !provider || !amount) {
+    try {
+      // Real mobile money integration (example with Flutterwave)
+      const flw = require('flutterwave-node-v3');
+      
+      const { phoneNumber, provider, amount, currency = 'NGN' } = paymentData;
+      
+      if (!phoneNumber || !provider || !amount) {
+        return false;
+      }
+
+      const payload = {
+        phone_number: phoneNumber,
+        amount: amount,
+        currency: currency,
+        email: 'customer@bagster.com',
+        tx_ref: `bagster_${Date.now()}`,
+        network: provider.toUpperCase(), // MTN, AIRTEL, etc.
+      };
+
+      const response = await flw.MobileMoney.ng(payload);
+      
+      if (response.status === 'success') {
+        // Poll for payment status
+        const txRef = response.data.tx_ref;
+        return await this.pollMobileMoneyStatus(txRef);
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Mobile money payment error:', error);
       return false;
     }
+  }
 
-    // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 3000));
+  private async pollMobileMoneyStatus(txRef: string, maxAttempts: number = 10): Promise<boolean> {
+    const flw = require('flutterwave-node-v3');
     
-    // Simulate 90% success rate for mobile money
-    return Math.random() > 0.1;
+    for (let i = 0; i < maxAttempts; i++) {
+      try {
+        const response = await flw.Transaction.verify({ id: txRef });
+        
+        if (response.data.status === 'successful') {
+          return true;
+        } else if (response.data.status === 'failed') {
+          return false;
+        }
+        
+        // Wait 3 seconds before next poll
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      } catch (error) {
+        console.error('Error polling mobile money status:', error);
+      }
+    }
+    
+    return false; // Timeout
   }
 
   private async processBankTransfer(paymentData: any): Promise<boolean> {

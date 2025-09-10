@@ -1,27 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
-
-// Mock data for demonstration
-const mockCarriers = [
-  {
-    id: 'carrier_001',
-    name: 'Express Logistics Nigeria',
-    rating: 4.8,
-    contact: { phone: '+234-800-123-4567', email: 'dispatch@expresslogistics.ng' }
-  },
-  {
-    id: 'carrier_002', 
-    name: 'Swift Cargo Services',
-    rating: 4.6,
-    contact: { phone: '+234-800-765-4321', email: 'bookings@swiftcargo.ng' }
-  },
-  {
-    id: 'carrier_003',
-    name: 'Pan-African Freight',
-    rating: 4.9,
-    contact: { phone: '+234-800-999-8888', email: 'operations@panafricanfreight.com' }
-  }
-];
+import { db } from '@/lib/firebase';
+import { 
+  collection, 
+  addDoc, 
+  doc, 
+  getDoc, 
+  serverTimestamp 
+} from 'firebase/firestore';
+import { shipmentAssignmentService } from '@/lib/services/shipmentAssignmentService';
+import { notificationService } from '@/lib/services/notificationService';
+import { webhookService } from '@/lib/services/webhookService';
+import { loggingService } from '@/lib/services/loggingService';
+import { rateLimitingService } from '@/lib/services/rateLimitingService';
+import { authService } from '@/lib/auth';
 
 function generateTrackingNumber(): string {
   const prefix = 'BGS';
@@ -104,14 +96,18 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
     
-    // Validate carrier exists
-    const carrier = mockCarriers.find(c => c.id === body.carrier_id);
-    if (!carrier) {
+    // Validate carrier exists in database
+    const carrierRef = doc(db, 'carriers', body.carrier_id);
+    const carrierDoc = await getDoc(carrierRef);
+    
+    if (!carrierDoc.exists() || !carrierDoc.data().isActive) {
       return NextResponse.json({
         success: false,
         error: 'Selected carrier not found or unavailable'
       }, { status: 400 });
     }
+    
+    const carrier = carrierDoc.data();
     
     // Generate shipment data
     const shipmentId = uuidv4();
@@ -119,15 +115,30 @@ export async function POST(request: NextRequest) {
     const totalCost = calculateShippingCost(body.origin, body.destination, weight, body.carrier_id);
     const estimatedDelivery = calculateEstimatedDelivery('2-3 days');
     
-    // Create shipment record (in real app, save to database)
+    // Get user ID from authentication
+    const authHeader = request.headers.get('authorization');
+    let userId = 'anonymous';
+    
+    if (authHeader) {
+      try {
+        const token = authHeader.replace('Bearer ', '');
+        const user = await authService.verifyJWT(token);
+        userId = user.uid;
+      } catch (error) {
+        // Continue with anonymous user
+      }
+    }
+    
+    // Create shipment record in Firebase
     const shipment = {
       shipment_id: shipmentId,
       tracking_number: trackingNumber,
       status: 'pending_confirmation',
+      userId,
       carrier: {
-        id: carrier.id,
+        id: body.carrier_id,
         name: carrier.name,
-        contact: carrier.contact.phone
+        contact: carrier.contact?.phone || carrier.phone
       },
       route: {
         origin: body.origin,
@@ -147,35 +158,117 @@ export async function POST(request: NextRequest) {
         currency: 'USD'
       },
       timeline: {
-        created_at: new Date().toISOString(),
-        estimated_delivery: estimatedDelivery
+        created_at: new Date(),
+        estimated_delivery: new Date(estimatedDelivery)
       },
       special_instructions: body.special_instructions,
       preferred_pickup_time: body.preferred_pickup_time,
       insurance_required: body.insurance_required || false
     };
     
-    // In a real application, you would:
-    // 1. Save shipment to database
-    // 2. Send notification to carrier
-    // 3. Send confirmation email to customer
-    // 4. Create audit log entry
+    // Save shipment to database
+    const shipmentRef = await addDoc(collection(db, 'shipments'), {
+      ...shipment,
+      timeline: {
+        created_at: serverTimestamp(),
+        estimated_delivery: new Date(estimatedDelivery)
+      }
+    });
     
-    console.log('Shipment created:', shipment);
+    // Create shipment assignment
+    await shipmentAssignmentService.createAssignment(
+      shipmentRef.id,
+      body.carrier_id,
+      'normal'
+    );
+    
+    // Send notifications
+    try {
+      // Notify carrier
+      await notificationService.sendNotification(
+        body.carrier_id,
+        'assignment_created',
+        'carrier_assigned',
+        {
+          shipmentId: shipmentRef.id,
+          trackingNumber,
+          pickupAddress: body.pickup_address,
+          carrierName: carrier.name,
+          expiresAt: new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString(),
+          phone: carrier.phone,
+          email: carrier.email
+        }
+      );
+      
+      // Notify customer
+      if (body.contact_info.email) {
+        await notificationService.sendNotification(
+          userId,
+          'shipment_update',
+          'shipment_created',
+          {
+            shipmentId: shipmentRef.id,
+            trackingNumber,
+            customerName: body.contact_info.name,
+            status: 'pending_confirmation',
+            email: body.contact_info.email
+          }
+        );
+      }
+    } catch (notificationError) {
+      await loggingService.warn('Failed to send shipment notifications', {
+        service: 'ShipmentAPI',
+        userId,
+        metadata: { shipmentId: shipmentRef.id, trackingNumber }
+      }, notificationError as Error);
+    }
+    
+    // Trigger webhooks
+    try {
+      await webhookService.triggerShipmentCreated({
+        ...shipment,
+        shipment_id: shipmentRef.id,
+        userId
+      });
+    } catch (webhookError) {
+      await loggingService.warn('Failed to trigger shipment webhook', {
+        service: 'ShipmentAPI',
+        userId,
+        metadata: { shipmentId: shipmentRef.id, trackingNumber }
+      }, webhookError as Error);
+    }
+    
+    // Log shipment creation
+    await loggingService.logShipmentEvent(
+      'created',
+      shipmentRef.id,
+      trackingNumber,
+      {
+        service: 'ShipmentAPI',
+        userId,
+        metadata: {
+          carrierId: body.carrier_id,
+          totalCost,
+          weight,
+          origin: body.origin,
+          destination: body.destination
+        }
+      }
+    );
     
     return NextResponse.json({
       success: true,
       data: {
-        shipment_id: shipment.shipment_id,
+        shipment_id: shipmentRef.id,
         tracking_number: shipment.tracking_number,
         status: shipment.status,
         carrier: shipment.carrier,
-        estimated_delivery: shipment.timeline.estimated_delivery,
+        estimated_delivery: estimatedDelivery,
         total_cost: shipment.pricing.total_cost,
         currency: shipment.pricing.currency,
         pickup_address: shipment.route.pickup_address,
         delivery_address: shipment.route.delivery_address,
-        created_at: shipment.timeline.created_at,
+        created_at: new Date().toISOString(),
         next_steps: [
           'Carrier will be notified of your shipment request',
           'You will receive confirmation within 2 hours',

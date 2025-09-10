@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Carrier, CreateCarrierRequest, UpdateCarrierRequest } from '@/lib/types/carrier';
 
-// Mock carrier data for demonstration
-const mockCarriers = [
+// Mock carrier data for admin management
+const mockCarriers: Carrier[] = [
   {
     id: 'carrier_001',
     name: 'Express Logistics Nigeria',
@@ -34,7 +35,13 @@ const mockCarriers = [
       international: true,
       same_day: true,
       next_day: true
-    }
+    },
+    status: 'approved',
+    country: 'Nigeria',
+    deliveryCountries: ['Nigeria', 'Ghana', 'Benin'],
+    totalDeliveries: 1247,
+    joinedAt: '2023-01-15',
+    lastActive: '2024-01-20'
   },
   {
     id: 'carrier_002',
@@ -68,7 +75,13 @@ const mockCarriers = [
       international: false,
       same_day: false,
       next_day: true
-    }
+    },
+    status: 'approved',
+    country: 'Nigeria',
+    deliveryCountries: ['Nigeria'],
+    totalDeliveries: 892,
+    joinedAt: '2023-03-20',
+    lastActive: '2024-01-19'
   },
   {
     id: 'carrier_003',
@@ -136,7 +149,13 @@ const mockCarriers = [
       international: false,
       same_day: false,
       next_day: false
-    }
+    },
+    status: 'approved',
+    country: 'Nigeria',
+    deliveryCountries: ['Nigeria'],
+    totalDeliveries: 634,
+    joinedAt: '2023-05-12',
+    lastActive: '2024-01-18'
   },
   {
     id: 'carrier_005',
@@ -300,6 +319,144 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: false,
       error: 'Failed to fetch carriers'
+    }, { status: 500 });
+  }
+}
+
+// POST - Create new carrier
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    
+    const newCarrier: Carrier = {
+      id: `carrier_${Date.now()}`,
+      name: body.name,
+      rating: 0,
+      service_areas: body.serviceAreas || [],
+      transport_modes: body.transportModes || ['road'],
+      services: body.services || ['pickup', 'delivery'],
+      insurance_available: body.insuranceAvailable || false,
+      verified: false,
+      contact: {
+        phone: body.phone,
+        email: body.email,
+        website: body.website || ''
+      },
+      capabilities: {
+        max_weight_kg: body.maxWeight || 1000,
+        max_dimensions_cm: body.maxDimensions || '200x150x100',
+        special_handling: body.specialHandling || [],
+        tracking_available: body.trackingAvailable || true,
+        real_time_updates: body.realTimeUpdates || false
+      },
+      pricing: {
+        base_rate_per_kg: body.pricePerKg,
+        minimum_charge: body.minimumCharge || 10.00,
+        pickup_fee: body.pickupFee || 5.00,
+        insurance_rate: body.insuranceRate || 0.01
+      },
+      coverage: {
+        domestic: body.domesticCoverage || true,
+        international: body.internationalCoverage || false,
+        same_day: body.sameDayCoverage || false,
+        next_day: body.nextDayCoverage || true
+      },
+      status: 'pending',
+      country: body.country,
+      deliveryCountries: body.deliveryCountries || [body.country],
+      totalDeliveries: 0,
+      joinedAt: new Date().toISOString().split('T')[0],
+      lastActive: new Date().toISOString().split('T')[0]
+    };
+
+    mockCarriers.push(newCarrier);
+
+    return NextResponse.json({
+      success: true,
+      data: newCarrier,
+      message: 'Carrier created successfully'
+    }, { status: 201 });
+
+  } catch (error) {
+    console.error('Carrier creation error:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to create carrier'
+    }, { status: 500 });
+  }
+}
+
+// PUT - Update carrier
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const carrierId = body.id;
+
+    const carrierIndex = mockCarriers.findIndex(c => c.id === carrierId);
+    if (carrierIndex === -1) {
+      return NextResponse.json({
+        success: false,
+        error: 'Carrier not found'
+      }, { status: 404 });
+    }
+
+    // Update carrier data
+    const updatedCarrier = {
+      ...mockCarriers[carrierIndex],
+      ...body,
+      lastActive: new Date().toISOString().split('T')[0]
+    };
+
+    mockCarriers[carrierIndex] = updatedCarrier;
+
+    return NextResponse.json({
+      success: true,
+      data: updatedCarrier,
+      message: 'Carrier updated successfully'
+    });
+
+  } catch (error) {
+    console.error('Carrier update error:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to update carrier'
+    }, { status: 500 });
+  }
+}
+
+// DELETE - Delete carrier
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const carrierId = searchParams.get('id');
+
+    if (!carrierId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Carrier ID is required'
+      }, { status: 400 });
+    }
+
+    const carrierIndex = mockCarriers.findIndex(c => c.id === carrierId);
+    if (carrierIndex === -1) {
+      return NextResponse.json({
+        success: false,
+        error: 'Carrier not found'
+      }, { status: 404 });
+    }
+
+    mockCarriers.splice(carrierIndex, 1);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Carrier deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Carrier deletion error:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to delete carrier'
     }, { status: 500 });
   }
 }

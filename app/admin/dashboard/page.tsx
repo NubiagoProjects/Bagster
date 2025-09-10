@@ -35,9 +35,14 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/components/ui/ToastContext'
 import DashboardSidebar from '@/components/ui/DashboardSidebar'
+import CarrierManagement from '@/components/admin/CarrierManagement'
+import AddCarrierForm from '@/components/admin/AddCarrierForm'
+import ApiKeyManagement from '@/components/admin/ApiKeyManagement'
 
 export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [activeTab, setActiveTab] = useState('overview')
+  const [showAddCarrierForm, setShowAddCarrierForm] = useState(false)
   const { addToast } = useToast()
   const userType = 'admin'
 
@@ -156,94 +161,152 @@ export default function AdminDashboard() {
               </button>
             </div>
           </div>
+          
+          {/* Navigation Tabs */}
+          <div className="mt-4 border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8">
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'overview'
+                    ? 'border-purple-500 text-purple-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => setActiveTab('carriers')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'carriers'
+                    ? 'border-purple-500 text-purple-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Carriers
+              </button>
+              <button
+                onClick={() => setActiveTab('api-keys')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'api-keys'
+                    ? 'border-purple-500 text-purple-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                API Keys
+              </button>
+            </nav>
+          </div>
         </div>
 
         {/* Main Content */}
         <div className="flex-1 overflow-auto p-6">
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {adminStats.map((stat, index) => (
-              <div key={index} className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                    <p className="text-2xl font-semibold text-gray-900 mt-2">{stat.value}</p>
-                  </div>
-                  <div className="flex items-center space-x-1 text-sm">
-                    {stat.trend === 'up' && <TrendingUp className="w-4 h-4 text-green-500" />}
-                    <span className={stat.trend === 'up' ? 'text-green-600 font-medium' : 'text-gray-600 font-medium'}>
-                      {stat.change}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Recent Activity & Pending Approvals */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            {/* Recent Activity */}
-            <div className="bg-white rounded-lg border border-gray-200">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
-              </div>
-              <div className="divide-y divide-gray-200">
-                {recentActivity.map((activity) => (
-                  <div key={activity.id} className="p-6 hover:bg-gray-50">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                        {activity.type === 'user_signup' && <User className="w-4 h-4 text-purple-600" />}
-                        {activity.type === 'carrier_approved' && <Truck className="w-4 h-4 text-purple-600" />}
-                        {activity.type === 'shipment_completed' && <Package className="w-4 h-4 text-purple-600" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">{activity.description}</p>
-                        <p className="text-sm text-gray-500">{activity.timestamp}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Pending Approvals */}
-            <div className="bg-white rounded-lg border border-gray-200">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">Pending Approvals</h2>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                    {pendingApprovals.length} pending
-                  </span>
-                </div>
-              </div>
-              <div className="divide-y divide-gray-200">
-                {pendingApprovals.map((approval) => (
-                  <div key={approval.id} className="p-6 hover:bg-gray-50">
+          {activeTab === 'overview' && (
+            <>
+              {/* Stats Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {adminStats.map((stat, index) => (
+                  <div key={index} className="bg-white rounded-lg border border-gray-200 p-6">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                          <User className="w-5 h-5 text-gray-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{approval.name}</p>
-                          <p className="text-sm text-gray-500">{approval.location}</p>
-                        </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">{stat.label}</p>
+                        <p className="text-2xl font-semibold text-gray-900 mt-2">{stat.value}</p>
                       </div>
-                      <div className="flex space-x-2">
-                        <button className="px-3 py-1 text-sm text-red-600 border border-red-200 rounded hover:bg-red-50">
-                          Reject
-                        </button>
-                        <button className="px-3 py-1 text-sm text-white bg-purple-600 rounded hover:bg-purple-700">
-                          Approve
-                        </button>
+                      <div className="flex items-center space-x-1 text-sm">
+                        {stat.trend === 'up' && <TrendingUp className="w-4 h-4 text-green-500" />}
+                        <span className={stat.trend === 'up' ? 'text-green-600 font-medium' : 'text-gray-600 font-medium'}>
+                          {stat.change}
+                        </span>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
+
+              {/* Recent Activity & Pending Approvals */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                {/* Recent Activity */}
+                <div className="bg-white rounded-lg border border-gray-200">
+                  <div className="px-6 py-4 border-b border-gray-200">
+                    <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
+                  </div>
+                  <div className="divide-y divide-gray-200">
+                    {recentActivity.map((activity) => (
+                      <div key={activity.id} className="p-6 hover:bg-gray-50">
+                        <div className="flex items-start space-x-4">
+                          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                            {activity.type === 'user_signup' && <User className="w-4 h-4 text-purple-600" />}
+                            {activity.type === 'carrier_approved' && <Truck className="w-4 h-4 text-purple-600" />}
+                            {activity.type === 'shipment_completed' && <Package className="w-4 h-4 text-purple-600" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900">{activity.description}</p>
+                            <p className="text-sm text-gray-500">{activity.timestamp}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Pending Approvals */}
+                <div className="bg-white rounded-lg border border-gray-200">
+                  <div className="px-6 py-4 border-b border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-semibold text-gray-900">Pending Approvals</h2>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        {pendingApprovals.length} pending
+                      </span>
+                    </div>
+                  </div>
+                  <div className="divide-y divide-gray-200">
+                    {pendingApprovals.map((approval) => (
+                      <div key={approval.id} className="p-6 hover:bg-gray-50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                              <User className="w-5 h-5 text-gray-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900">{approval.name}</p>
+                              <p className="text-sm text-gray-500">{approval.location}</p>
+                            </div>
+                          </div>
+                          <div className="flex space-x-2">
+                            <button className="px-3 py-1 text-sm text-red-600 border border-red-200 rounded hover:bg-red-50">
+                              Reject
+                            </button>
+                            <button className="px-3 py-1 text-sm text-white bg-purple-600 rounded hover:bg-purple-700">
+                              Approve
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {activeTab === 'carriers' && (
+            <CarrierManagement onAddCarrier={() => setShowAddCarrierForm(true)} />
+          )}
+
+          {activeTab === 'api-keys' && (
+            <ApiKeyManagement />
+          )}
         </div>
+
+        {/* Add Carrier Form Modal */}
+        <AddCarrierForm
+          isOpen={showAddCarrierForm}
+          onClose={() => setShowAddCarrierForm(false)}
+          onCarrierAdded={() => {
+            // Refresh carriers list if needed
+            window.location.reload()
+          }}
+        />
       </div>
     </div>
   )

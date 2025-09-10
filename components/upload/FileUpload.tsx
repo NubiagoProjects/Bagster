@@ -1,9 +1,7 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
-import { storage } from '@/lib/firebase'
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage'
-import { Upload, X, File, Image, FileText, AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { Upload, X, File, Image, FileText, AlertCircle, CheckCircle } from 'lucide-react'
 
 interface UploadedFile {
   id: string
@@ -19,42 +17,19 @@ interface FileUploadProps {
   maxSizeBytes?: number
   acceptedTypes?: string[]
   onFilesChange?: (files: UploadedFile[]) => void
-  folder?: string
   className?: string
-  multiple?: boolean
 }
-
-const defaultAcceptedTypes = [
-  'image/jpeg',
-  'image/png', 
-  'image/gif',
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'text/plain'
-]
 
 export default function FileUpload({
   maxFiles = 5,
   maxSizeBytes = 10 * 1024 * 1024, // 10MB
-  acceptedTypes = defaultAcceptedTypes,
+  acceptedTypes = ['image/*', 'application/pdf', '.doc', '.docx'],
   onFilesChange,
-  folder = 'uploads',
-  className = '',
-  multiple = true
+  className = ''
 }: FileUploadProps) {
   const [files, setFiles] = useState<UploadedFile[]>([])
-  const [uploading, setUploading] = useState<string[]>([])
-  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({})
   const [errors, setErrors] = useState<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const getFileIcon = (type: string) => {
-    if (type.startsWith('image/')) return Image
-    if (type === 'application/pdf') return FileText
-    if (type.includes('document') || type.includes('word')) return FileText
-    return File
-  }
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes'
@@ -64,15 +39,15 @@ export default function FileUpload({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
+  const getFileIcon = (type: string) => {
+    if (type.startsWith('image/')) return <Image className="w-4 h-4" />
+    if (type.includes('pdf')) return <FileText className="w-4 h-4" />
+    return <File className="w-4 h-4" />
+  }
+
   const validateFile = (file: File): string | null => {
-    if (!acceptedTypes.includes(file.type)) {
-      return `File type ${file.type} is not supported`
-    }
     if (file.size > maxSizeBytes) {
-      return `File size ${formatFileSize(file.size)} exceeds limit of ${formatFileSize(maxSizeBytes)}`
-    }
-    if (!multiple && files.length >= 1) {
-      return 'Only one file is allowed'
+      return `File size must be less than ${formatFileSize(maxSizeBytes)}`
     }
     if (files.length >= maxFiles) {
       return `Maximum ${maxFiles} files allowed`
@@ -80,249 +55,139 @@ export default function FileUpload({
     return null
   }
 
-  const uploadFile = useCallback(async (file: File): Promise<UploadedFile> => {
-    const fileId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-    const fileName = `${fileId}-${file.name}`
-    const storageRef = ref(storage, `${folder}/${fileName}`)
-
-    return new Promise((resolve, reject) => {
-      const uploadTask = uploadBytesResumable(storageRef, file)
-
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-          setUploadProgress(prev => ({ ...prev, [fileId]: progress }))
-        },
-        (error) => {
-          console.error('Upload error:', error)
-          setUploading(prev => prev.filter(id => id !== fileId))
-          setUploadProgress(prev => {
-            const newProgress = { ...prev }
-            delete newProgress[fileId]
-            return newProgress
-          })
-          reject(error)
-        },
-        async () => {
-          try {
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref)
-            const uploadedFile: UploadedFile = {
-              id: fileId,
-              name: file.name,
-              size: file.size,
-              type: file.type,
-              url: downloadURL,
-              uploadedAt: new Date()
-            }
-            
-            setUploading(prev => prev.filter(id => id !== fileId))
-            setUploadProgress(prev => {
-              const newProgress = { ...prev }
-              delete newProgress[fileId]
-              return newProgress
-            })
-            
-            resolve(uploadedFile)
-          } catch (error) {
-            reject(error)
-          }
-        }
-      )
-    })
-  }, [folder])
-
-  const handleFileSelect = async (selectedFiles: FileList) => {
+  const handleFileSelect = (selectedFiles: FileList) => {
+    const fileArray = Array.from(selectedFiles)
+    const newFiles: UploadedFile[] = []
     const newErrors: string[] = []
-    const validFiles: File[] = []
-
-    Array.from(selectedFiles).forEach(file => {
+    
+    for (const file of fileArray) {
       const error = validateFile(file)
       if (error) {
-        newErrors.push(`${file.name}: ${error}`)
-      } else {
-        validFiles.push(file)
+        newErrors.push(error)
+        continue
       }
-    })
 
-    setErrors(newErrors)
-
-    if (validFiles.length === 0) return
-
-    const uploadPromises = validFiles.map(async file => {
-      const fileId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-      setUploading(prev => [...prev, fileId])
-
-      try {
-        const uploadedFile = await uploadFile(file)
-        return uploadedFile
-      } catch (error) {
-        console.error('Failed to upload file:', error)
-        newErrors.push(`${file.name}: Upload failed`)
-        return null
+      // Mock upload - in production, upload to actual storage
+      const uploadedFile: UploadedFile = {
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        url: `https://example.com/uploads/${file.name}`,
+        uploadedAt: new Date()
       }
-    })
-
-    const results = await Promise.all(uploadPromises)
-    const successfulUploads = results.filter(Boolean) as UploadedFile[]
-
-    if (successfulUploads.length > 0) {
-      const updatedFiles = [...files, ...successfulUploads]
+      
+      newFiles.push(uploadedFile)
+    }
+    
+    if (newFiles.length > 0) {
+      const updatedFiles = [...files, ...newFiles]
       setFiles(updatedFiles)
       onFilesChange?.(updatedFiles)
     }
-
-    setErrors(prev => [...prev, ...newErrors])
+    
+    if (newErrors.length > 0) {
+      setErrors(prev => [...prev, ...newErrors])
+    }
   }
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  const removeFile = (fileId: string) => {
+    const updatedFiles = files.filter(f => f.id !== fileId)
+    setFiles(updatedFiles)
+    onFilesChange?.(updatedFiles)
+  }
+
+  const clearErrors = () => setErrors([])
+
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     const droppedFiles = e.dataTransfer.files
     if (droppedFiles.length > 0) {
       handleFileSelect(droppedFiles)
     }
-  }, [handleFileSelect])
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-  }, [])
-
-  const removeFile = async (fileId: string) => {
-    const file = files.find(f => f.id === fileId)
-    if (!file) return
-
-    try {
-      // Delete from Firebase Storage
-      const fileRef = ref(storage, file.url)
-      await deleteObject(fileRef)
-      
-      // Remove from state
-      const updatedFiles = files.filter(f => f.id !== fileId)
-      setFiles(updatedFiles)
-      onFilesChange?.(updatedFiles)
-    } catch (error) {
-      console.error('Failed to delete file:', error)
-      setErrors(prev => [...prev, `Failed to delete ${file.name}`])
-    }
   }
 
-  const clearErrors = () => setErrors([])
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+  }
 
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Upload Area */}
       <div
-        className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
+        className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer"
         onClick={() => fileInputRef.current?.click()}
       >
         <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <p className="text-lg font-medium text-gray-900 mb-2">
+        <p className="text-lg font-medium text-gray-700 mb-2">
           Drop files here or click to browse
         </p>
-        <p className="text-sm text-gray-500 mb-2">
-          Supports: {acceptedTypes.map(type => type.split('/')[1]).join(', ')}
+        <p className="text-sm text-gray-500 mb-4">
+          Maximum {maxFiles} files, up to {formatFileSize(maxSizeBytes)} each
         </p>
-        <p className="text-xs text-gray-400">
-          Max {maxFiles} files, {formatFileSize(maxSizeBytes)} each
-        </p>
+        
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept={acceptedTypes.join(',')}
+          onChange={(e) => e.target.files && handleFileSelect(e.target.files)}
+          className="hidden"
+        />
       </div>
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple={multiple}
-        accept={acceptedTypes.join(',')}
-        onChange={(e) => e.target.files && handleFileSelect(e.target.files)}
-        className="hidden"
-      />
-
-      {/* Errors */}
+      {/* Error Messages */}
       {errors.length > 0 && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center">
-              <AlertCircle className="w-5 h-5 text-red-600 mr-2" />
-              <h4 className="text-red-800 font-medium">Upload Errors</h4>
+          <div className="flex items-start">
+            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-red-800 mb-2">Upload Errors</h3>
+              <ul className="text-sm text-red-700 space-y-1">
+                {errors.map((error, index) => (
+                  <li key={index}>• {error}</li>
+                ))}
+              </ul>
+              <button
+                onClick={clearErrors}
+                className="text-sm text-red-600 hover:text-red-800 mt-2 underline"
+              >
+                Clear errors
+              </button>
             </div>
-            <button
-              onClick={clearErrors}
-              className="text-red-600 hover:text-red-800"
-            >
-              <X className="w-4 h-4" />
-            </button>
           </div>
-          <ul className="text-sm text-red-600 space-y-1">
-            {errors.map((error, index) => (
-              <li key={index}>• {error}</li>
-            ))}
-          </ul>
         </div>
       )}
 
       {/* Uploaded Files */}
       {files.length > 0 && (
-        <div className="space-y-2">
-          <h4 className="font-medium text-gray-900">Uploaded Files ({files.length})</h4>
-          <div className="space-y-2">
-            {files.map((file) => {
-              const FileIcon = getFileIcon(file.type)
-              return (
-                <div
-                  key={file.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
-                >
-                  <div className="flex items-center space-x-3">
-                    <FileIcon className="w-8 h-8 text-gray-600" />
-                    <div>
-                      <p className="font-medium text-gray-900">{file.name}</p>
-                      <p className="text-sm text-gray-500">
-                        {formatFileSize(file.size)} • {file.uploadedAt.toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                    <button
-                      onClick={() => removeFile(file.id)}
-                      className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Uploading Files */}
-      {uploading.length > 0 && (
-        <div className="space-y-2">
-          <h4 className="font-medium text-gray-900">Uploading...</h4>
-          <div className="space-y-2">
-            {uploading.map((fileId) => (
-              <div key={fileId} className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg border">
-                <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium text-gray-900">Uploading...</span>
-                    <span className="text-sm text-gray-600">
-                      {Math.round(uploadProgress[fileId] || 0)}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${uploadProgress[fileId] || 0}%` }}
-                    />
-                  </div>
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-gray-700">Uploaded Files ({files.length})</h3>
+          {files.map((file) => (
+            <div key={file.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center space-x-3">
+                {getFileIcon(file.type)}
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{file.name}</p>
+                  <p className="text-xs text-gray-500">
+                    {formatFileSize(file.size)} • Uploaded {file.uploadedAt.toLocaleDateString()}
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <button
+                  onClick={() => removeFile(file.id)}
+                  className="text-red-600 hover:text-red-800 p-1"
+                  title="Remove file"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

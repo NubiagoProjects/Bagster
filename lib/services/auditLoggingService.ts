@@ -62,7 +62,9 @@ class AuditLoggingService {
         ...(errorMessage && { errorMessage })
       }
 
-      const docRef = await addDoc(collection(db, 'auditLogs'), auditLog)
+      // Mock database write for demo - replace with actual Firebase in production
+      // const docRef = await addDoc(collection(db, 'auditLogs'), auditLog)
+      const docRef = { id: `audit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}` }
       
       // Log to console for development
       console.log(`🔍 Audit Log: ${action} on ${resource}/${resourceId} by ${userEmail} [${severity}]`)
@@ -341,52 +343,8 @@ class AuditLoggingService {
     lastDoc?: DocumentSnapshot
   ): Promise<{ logs: AuditLog[]; lastDoc: DocumentSnapshot | null; hasMore: boolean }> {
     try {
-      let q = query(collection(db, 'auditLogs'), orderBy('timestamp', 'desc'))
-
-      // Apply filters
-      if (filter.userId) {
-        q = query(q, where('userId', '==', filter.userId))
-      }
-      if (filter.action) {
-        q = query(q, where('action', '==', filter.action))
-      }
-      if (filter.resource) {
-        q = query(q, where('resource', '==', filter.resource))
-      }
-      if (filter.category) {
-        q = query(q, where('category', '==', filter.category))
-      }
-      if (filter.severity) {
-        q = query(q, where('severity', '==', filter.severity))
-      }
-      if (filter.success !== undefined) {
-        q = query(q, where('success', '==', filter.success))
-      }
-      if (filter.startDate) {
-        q = query(q, where('timestamp', '>=', filter.startDate))
-      }
-      if (filter.endDate) {
-        q = query(q, where('timestamp', '<=', filter.endDate))
-      }
-
-      // Pagination
-      q = query(q, limit(pageSize))
-      if (lastDoc) {
-        q = query(q, startAfter(lastDoc))
-      }
-
-      const snapshot = await getDocs(q)
-      const logs = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        timestamp: doc.data().timestamp?.toDate() || new Date()
-      })) as AuditLog[]
-
-      return {
-        logs,
-        lastDoc: snapshot.docs[snapshot.docs.length - 1] || null,
-        hasMore: snapshot.docs.length === pageSize
-      }
+      // Mock implementation for demo - replace with actual Firebase in production
+      return { logs: [], lastDoc: null, hasMore: false }
     } catch (error) {
       console.error('Failed to get audit logs:', error)
       return { logs: [], lastDoc: null, hasMore: false }
@@ -529,7 +487,8 @@ class AuditLoggingService {
           timestamp: new Date()
         }
         
-        const docRef = await addDoc(collection(db, 'auditLogs'), auditLog)
+        // Mock database write for demo
+        const docRef = { id: `bulk_audit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}` }
         return docRef.id
       })
       
@@ -546,18 +505,9 @@ class AuditLoggingService {
       const cutoffDate = new Date()
       cutoffDate.setDate(cutoffDate.getDate() - daysToKeep)
       
-      const oldLogsQuery = query(
-        collection(db, 'auditLogs'),
-        where('timestamp', '<', cutoffDate),
-        limit(100) // Process in batches
-      )
-      
-      const snapshot = await getDocs(oldLogsQuery)
-      
-      // In a real implementation, you'd use batch deletes
-      console.log(`Found ${snapshot.size} old audit logs to cleanup`)
-      
-      return snapshot.size
+      // Mock cleanup for demo - replace with actual Firebase in production
+      console.log(`Mock cleanup: would remove logs older than ${daysToKeep} days`)
+      return 0
     } catch (error) {
       console.error('Failed to cleanup old logs:', error)
       return 0

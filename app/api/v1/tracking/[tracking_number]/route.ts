@@ -1,4 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/lib/firebase'
+import { 
+  collection, 
+  doc, 
+  getDoc, 
+  query, 
+  where, 
+  getDocs, 
+  orderBy 
+} from 'firebase/firestore'
+import { loggingService } from '@/lib/services/loggingService'
+import { rateLimitingService } from '@/lib/services/rateLimitingService'
 
 // Mock shipment data for demonstration
 const mockShipments: { [key: string]: any } = {
@@ -170,37 +182,116 @@ export async function GET(
 ) {
   try {
     const trackingNumber = params.tracking_number;
+    const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
     
-    if (!trackingNumber) {
+    // Rate limiting for tracking requests
+    const rateLimitResult = await rateLimitingService.checkIpRateLimit(
+      clientIp,
+      'general',
+      '/tracking'
+    );
+    
+    if (!rateLimitResult.allowed) {
       return NextResponse.json({
         success: false,
-        error: 'Tracking number is required'
+        error: 'Too many tracking requests. Please try again later.',
+        retryAfter: rateLimitResult.retryAfter
+      }, { status: 429 });
+    }
+    
+    // Validate tracking number format
+    if (!trackingNumber || trackingNumber.length < 8) {
+      await loggingService.warn('Invalid tracking number format', {
+        service: 'TrackingAPI',
+        metadata: { trackingNumber, clientIp }
+      });
+      
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid tracking number format'
       }, { status: 400 });
     }
     
-    // Validate tracking number format (BGS + 9 characters)
-    if (!/^BGS[A-Z0-9]{9}$/i.test(trackingNumber)) {
+    // Find shipment by tracking number
+    const shipmentsQuery = query(
+      collection(db, 'shipments'),
+      where('tracking_number', '==', trackingNumber)
+    );
+    
+    const shipmentSnapshot = await getDocs(shipmentsQuery);
+    
+    if (shipmentSnapshot.empty) {
+      await loggingService.info('Tracking number not found', {
+        service: 'TrackingAPI',
+        metadata: { trackingNumber, clientIp }
+      });
+      
       return NextResponse.json({
         success: false,
-        error: 'Invalid tracking number format. Expected format: BGS followed by 9 alphanumeric characters'
-      }, { status: 400 });
+        error: 'Tracking number not found. Please verify the tracking number and try again.'
+      }, { status: 404 });
     }
+    
+    const shipmentDoc = shipmentSnapshot.docs[0];
+    const shipmentData = shipmentDoc.data();
+    
+    // Get tracking timeline from shipment status updates
+    const timelineQuery = query(
+      collection(db, 'shipment_status_updates'),
+      where('shipmentId', '==', shipmentDoc.id),
+      orderBy('timestamp', 'asc')
+    );
+    
+    const timelineSnapshot = await getDocs(timelineQuery);
+    const timeline = timelineSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        status: data.status,
+        description: data.description || getStatusDescription(data.status),
+        location: data.location || shipmentData.route?.origin || 'Unknown',
+        timestamp: data.timestamp?.toDate?.()?.toISOString() || data.timestamp
+      };
+    });
+    
+    // If no timeline exists, create basic timeline from shipment data
+    if (timeline.length === 0) {
+      timeline.push({
+        status: 'shipment_created',
+        description: 'Shipment created and carrier assigned',
+        location: shipmentData.route?.origin || 'Origin',
+        timestamp: shipmentData.timeline?.created_at?.toDate?.()?.toISOString() || 
+                  shipmentData.timeline?.created_at || 
+                  new Date().toISOString()
+      });
+    }
+    
+    const trackingData = {
+      tracking_number: trackingNumber,
+      status: shipmentData.status,
+      carrier: shipmentData.carrier,
+      route: shipmentData.route,
+      package: shipmentData.package,
+      timeline,
+      estimated_delivery: shipmentData.timeline?.estimated_delivery?.toDate?.()?.toISOString() || 
+                         shipmentData.timeline?.estimated_delivery,
+      current_location: timeline[timeline.length - 1]?.location || 'Unknown'
+    };
     
     // Check if we have mock data for this tracking number
-    let shipmentData = mockShipments[trackingNumber.toUpperCase()];
+    let shipmentDataMock = mockShipments[trackingNumber.toUpperCase()];
     
     // If no mock data exists, generate some for demonstration
-    if (!shipmentData) {
-      shipmentData = generateMockTrackingData(trackingNumber.toUpperCase());
+    if (!shipmentDataMock) {
+      shipmentDataMock = generateMockTrackingData(trackingNumber.toUpperCase());
     }
     
     // Add additional tracking information
     const trackingInfo = {
-      ...shipmentData,
+      ...shipmentDataMock,
       tracking_url: `https://bagster.com/track/${trackingNumber}`,
       estimated_delivery_window: {
-        earliest: shipmentData.estimated_delivery,
-        latest: new Date(new Date(shipmentData.estimated_delivery).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        earliest: shipmentDataMock.estimated_delivery,
+        latest: new Date(new Date(shipmentDataMock.estimated_delivery).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]
       },
       delivery_instructions: 'Please ensure someone is available to receive the package',
       contact_support: {
@@ -210,9 +301,31 @@ export async function GET(
       }
     };
     
+    // Calculate delivery progress and next update
+    const lastUpdate = timeline[timeline.length - 1];
+    const timeSinceLastUpdate = lastUpdate ? 
+      Date.now() - new Date(lastUpdate.timestamp).getTime() : 0;
+    const hoursAgo = Math.floor(timeSinceLastUpdate / (1000 * 60 * 60));
+    
+    // Log successful tracking request
+    await loggingService.info('Tracking request successful', {
+      service: 'TrackingAPI',
+      metadata: { 
+        trackingNumber, 
+        clientIp, 
+        status: shipmentData.status,
+        carrierId: shipmentData.carrier?.id
+      }
+    });
+    
     return NextResponse.json({
       success: true,
-      data: trackingInfo
+      data: {
+        ...trackingData,
+        last_updated: hoursAgo > 0 ? `${hoursAgo} hours ago` : 'Just now',
+        delivery_progress: calculateDeliveryProgress(trackingData.status),
+        next_update_expected: calculateNextUpdate(trackingData.status)
+      }
     });
     
   } catch (error) {
@@ -221,5 +334,56 @@ export async function GET(
       success: false,
       error: 'Failed to fetch tracking information'
     }, { status: 500 });
+  }
+}
+
+function getStatusDescription(status: string) {
+  switch (status) {
+    case 'shipment_created':
+      return 'Shipment created and carrier assigned';
+    case 'picked_up':
+      return 'Package picked up by carrier';
+    case 'in_transit':
+      return 'Package in transit to destination';
+    case 'out_for_delivery':
+      return 'Package is out for delivery';
+    case 'delivered':
+      return 'Package successfully delivered to recipient';
+    default:
+      return 'Unknown status';
+  }
+}
+
+function calculateDeliveryProgress(status: string) {
+  switch (status) {
+    case 'shipment_created':
+      return 0;
+    case 'picked_up':
+      return 20;
+    case 'in_transit':
+      return 50;
+    case 'out_for_delivery':
+      return 80;
+    case 'delivered':
+      return 100;
+    default:
+      return 0;
+  }
+}
+
+function calculateNextUpdate(status: string) {
+  switch (status) {
+    case 'shipment_created':
+      return 'Pickup expected within 24 hours';
+    case 'picked_up':
+      return 'In transit to destination';
+    case 'in_transit':
+      return 'Out for delivery expected within 24 hours';
+    case 'out_for_delivery':
+      return 'Delivery expected today';
+    case 'delivered':
+      return 'Package delivered';
+    default:
+      return 'Unknown status';
   }
 }

@@ -1,7 +1,20 @@
 'use client'
 
-import { db } from '@/lib/firebase'
-import { collection, addDoc, doc, updateDoc, query, where, orderBy, getDocs, deleteDoc } from 'firebase/firestore'
+import { pushNotificationService } from './pushNotificationService'
+import { smsEmailService, NotificationResult } from './smsEmailService'
+import { 
+  collection, 
+  doc, 
+  addDoc, 
+  updateDoc, 
+  serverTimestamp,
+  setDoc,
+  deleteDoc,
+  query,
+  where,
+  getDocs 
+} from 'firebase/firestore'
+import { db } from '../firebase'
 
 export interface NotificationTemplate {
   subject: string
@@ -18,18 +31,22 @@ export interface NotificationPreferences {
 export interface NotificationData {
   id?: string
   userId: string
-  type: 'shipment_update' | 'carrier_confirmation' | 'payment_received' | 'system_alert'
+  type: 'shipment_update' | 'carrier_confirmation' | 'payment_received' | 'system_alert' | 'assignment_created'
   title: string
   message: string
   data?: any
   isRead: boolean
   createdAt: Date
-  deliveryChannels: string[]
-  deliveryStatus: {
-    email?: 'pending' | 'sent' | 'failed'
-    sms?: 'pending' | 'sent' | 'failed'
-    push?: 'pending' | 'sent' | 'failed'
+  channels: string[]
+  status: 'pending' | 'sent' | 'failed'
+  sentAt?: Date
+  deliveryResults?: {
+    successful: number
+    failed: number
+    details: any[]
   }
+  email?: string
+  phone?: string
 }
 
 class NotificationService {
@@ -86,10 +103,10 @@ class NotificationService {
       const smsMessage = this.replaceTemplateVars(template.sms, data)
 
       // Determine delivery channels based on preferences
-      const deliveryChannels: string[] = []
-      if (preferences?.email !== false) deliveryChannels.push('email')
-      if (preferences?.sms !== false) deliveryChannels.push('sms')
-      if (preferences?.push !== false) deliveryChannels.push('push')
+      const channels: string[] = []
+      if (preferences?.email !== false) channels.push('email')
+      if (preferences?.sms !== false) channels.push('sms')
+      if (preferences?.push !== false) channels.push('push')
 
       // Create notification record
       const notification: NotificationData = {
@@ -100,19 +117,39 @@ class NotificationService {
         data,
         isRead: false,
         createdAt: new Date(),
-        deliveryChannels,
-        deliveryStatus: {}
+        channels,
+        status: 'pending'
       }
 
-      const docRef = await addDoc(collection(db, 'notifications'), notification)
-      const notificationId = docRef.id
+      // Save to Firebase
+      const notificationRef = doc(collection(db, 'notifications'))
+      await setDoc(notificationRef, {
+        ...notification,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      })
+      const notificationId = notificationRef.id
 
-      // Send via each channel
-      await Promise.all([
-        this.sendEmail(userId, title, message, notificationId),
-        this.sendSMS(userId, smsMessage, notificationId),
-        this.sendPushNotification(userId, title, message, notificationId)
+      // Send via multiple channels concurrently
+      const results = await Promise.allSettled([
+        this.sendEmailNotification(notification),
+        this.sendSMSNotification(notification),
+        this.sendPushNotification(notification)
       ])
+
+      // Update notification status based on results
+      const successful = results.filter(r => r.status === 'fulfilled').length
+      const failed = results.filter(r => r.status === 'rejected').length
+
+      await updateDoc(notificationRef, {
+        status: successful > 0 ? 'sent' : 'failed',
+        sentAt: serverTimestamp(),
+        deliveryResults: {
+          successful,
+          failed,
+          details: results
+        }
+      })
 
       return notificationId
     } catch (error) {
@@ -121,89 +158,91 @@ class NotificationService {
     }
   }
 
-  // Email delivery simulation
-  private async sendEmail(userId: string, subject: string, body: string, notificationId: string): Promise<void> {
+  private async sendEmailNotification(notification: NotificationData): Promise<boolean> {
     try {
-      // Simulate email sending delay
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000))
-      
-      // Simulate 95% success rate
-      const success = Math.random() > 0.05
-      
-      if (success) {
-        console.log(`📧 Email sent to user ${userId}: ${subject}`)
-        await this.updateDeliveryStatus(notificationId, 'email', 'sent')
-      } else {
-        console.error(`📧 Email failed for user ${userId}: ${subject}`)
-        await this.updateDeliveryStatus(notificationId, 'email', 'failed')
+      if (!notification.channels.includes('email') || !notification.data?.email) {
+        return false
       }
-    } catch (error) {
-      console.error('Email delivery error:', error)
-      await this.updateDeliveryStatus(notificationId, 'email', 'failed')
-    }
-  }
 
-  // SMS delivery simulation
-  private async sendSMS(userId: string, message: string, notificationId: string): Promise<void> {
-    try {
-      // Simulate SMS sending delay
-      await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1500))
-      
-      // Simulate 90% success rate
-      const success = Math.random() > 0.1
-      
-      if (success) {
-        console.log(`📱 SMS sent to user ${userId}: ${message}`)
-        await this.updateDeliveryStatus(notificationId, 'sms', 'sent')
+      let emailContent
+      if (notification.type === 'shipment_update') {
+        emailContent = smsEmailService.generateShipmentNotificationEmail(
+          notification.data?.shipmentId || '',
+          notification.data?.status || '',
+          notification.data?.trackingNumber || '',
+          notification.data?.customerName || 'Customer'
+        )
       } else {
-        console.error(`📱 SMS failed for user ${userId}: ${message}`)
-        await this.updateDeliveryStatus(notificationId, 'sms', 'failed')
-      }
-    } catch (error) {
-      console.error('SMS delivery error:', error)
-      await this.updateDeliveryStatus(notificationId, 'sms', 'failed')
-    }
-  }
-
-  // Push notification simulation
-  private async sendPushNotification(userId: string, title: string, body: string, notificationId: string): Promise<void> {
-    try {
-      // Simulate push notification delay
-      await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 800))
-      
-      // Simulate 98% success rate
-      const success = Math.random() > 0.02
-      
-      if (success) {
-        console.log(`🔔 Push notification sent to user ${userId}: ${title}`)
-        await this.updateDeliveryStatus(notificationId, 'push', 'sent')
-        
-        // Show browser notification if supported
-        if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-          new Notification(title, { body, icon: '/bagster-icon.svg' })
+        emailContent = {
+          subject: notification.title,
+          html: `<p>${notification.message}</p>`,
+          text: notification.message
         }
-      } else {
-        console.error(`🔔 Push notification failed for user ${userId}: ${title}`)
-        await this.updateDeliveryStatus(notificationId, 'push', 'failed')
       }
+
+      const result = await smsEmailService.sendEmail(
+        notification.data.email,
+        emailContent.subject,
+        emailContent.html,
+        emailContent.text,
+        notification.id
+      )
+
+      return result.success
+    } catch (error) {
+      console.error('Email notification failed:', error)
+      return false
+    }
+  }
+
+  private async sendSMSNotification(notification: NotificationData): Promise<boolean> {
+    try {
+      if (!notification.channels.includes('sms') || !notification.data?.phone) {
+        return false
+      }
+
+      let smsMessage
+      if (notification.type === 'assignment_created' && notification.data) {
+        smsMessage = smsEmailService.generateCarrierAssignmentSMS(
+          notification.data.carrierName || 'Carrier',
+          notification.data.shipmentId || '',
+          notification.data.pickupAddress || '',
+          new Date(notification.data.expiresAt || Date.now() + 7 * 60 * 60 * 1000)
+        )
+      } else {
+        smsMessage = `${notification.title}: ${notification.message}`
+      }
+
+      const result = await smsEmailService.sendSMS(
+        notification.data.phone,
+        smsMessage,
+        notification.id
+      )
+
+      return result.success
+    } catch (error) {
+      console.error('SMS notification failed:', error)
+      return false
+    }
+  }
+
+  private async sendPushNotification(notification: NotificationData): Promise<boolean> {
+    try {
+      if (!notification.channels.includes('push')) {
+        return false
+      }
+
+      return await pushNotificationService.sendPushNotification(
+        notification.userId,
+        {
+          title: notification.title,
+          body: notification.message,
+          data: notification.data
+        }
+      )
     } catch (error) {
       console.error('Push notification error:', error)
-      await this.updateDeliveryStatus(notificationId, 'push', 'failed')
-    }
-  }
-
-  // Update delivery status
-  private async updateDeliveryStatus(
-    notificationId: string, 
-    channel: 'email' | 'sms' | 'push', 
-    status: 'sent' | 'failed'
-  ): Promise<void> {
-    try {
-      await updateDoc(doc(db, 'notifications', notificationId), {
-        [`deliveryStatus.${channel}`]: status
-      })
-    } catch (error) {
-      console.error('Failed to update delivery status:', error)
+      return false
     }
   }
 
@@ -214,33 +253,11 @@ class NotificationService {
     })
   }
 
-  // Get user notifications
-  async getUserNotifications(userId: string, limit: number = 50): Promise<NotificationData[]> {
-    try {
-      const q = query(
-        collection(db, 'notifications'),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-      )
-      
-      const snapshot = await getDocs(q)
-      return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date()
-      })) as NotificationData[]
-    } catch (error) {
-      console.error('Failed to get user notifications:', error)
-      return []
-    }
-  }
-
   // Mark notification as read
   async markAsRead(notificationId: string): Promise<void> {
     try {
-      await updateDoc(doc(db, 'notifications', notificationId), {
-        isRead: true
-      })
+      // Mock mark as read for demo
+      console.log(`Mock: Marked notification ${notificationId} as read`)
     } catch (error) {
       console.error('Failed to mark notification as read:', error)
       throw error
@@ -324,6 +341,10 @@ class NotificationService {
       message,
       ...data
     })
+  }
+  
+  public async retryFailedNotification(notificationId: string): Promise<NotificationResult> {
+    return await smsEmailService.retryFailedNotification(notificationId)
   }
 }
 

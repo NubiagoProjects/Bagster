@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   Truck, 
   Package, 
@@ -25,86 +25,118 @@ import {
   Target,
   ArrowRight,
   Eye,
-  MoreHorizontal
+  MoreHorizontal,
+  QrCode,
+  Timer,
+  Zap
 } from 'lucide-react'
 import { useToast } from '@/components/ui/ToastContext'
 import DashboardSidebar from '@/components/ui/DashboardSidebar'
 
 export default function CarrierDashboard() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'accepted' | 'active'>('all')
+  const [shipments, setShipments] = useState<any[]>([])
+  const [stats, setStats] = useState<any>({})
+  const [loading, setLoading] = useState(true)
   const { addToast } = useToast()
   const userType = 'carrier'
+  const carrierId = 'carrier_1' // Mock carrier ID - get from auth in production
 
-  // Mock data for carrier dashboard
-  const carrierStats = [
-    {
-      label: 'Total Shipments',
-      value: '156',
-      change: '+12%',
-      trend: 'up'
-    },
-    {
-      label: 'Active Shipments',
-      value: '23',
-      change: '+5%',
-      trend: 'up'
-    },
-    {
-      label: 'Total Revenue',
-      value: '$45,600',
-      change: '+8%',
-      trend: 'up'
-    },
-    {
-      label: 'Rating',
-      value: '4.8',
-      change: '89 reviews',
-      trend: 'stable'
-    }
-  ]
+  // Fetch carrier shipments
+  useEffect(() => {
+    fetchShipments(activeTab)
+  }, [activeTab])
 
-  const recentShipments = [
-    {
-      id: 'BAG123456789',
-      status: 'in-transit',
-      origin: 'Lagos, Nigeria',
-      destination: 'Nairobi, Kenya',
-      weight: '25kg',
-      value: '$1,200',
-      customer: 'TechCorp Ltd',
-      pickupDate: '2024-01-15',
-      estimatedDelivery: '2024-01-22'
-    },
-    {
-      id: 'BAG987654321',
-      status: 'picked-up',
-      origin: 'Accra, Ghana',
-      destination: 'Lagos, Nigeria',
-      weight: '15kg',
-      value: '$800',
-      customer: 'Global Imports',
-      pickupDate: '2024-01-14',
-      estimatedDelivery: '2024-01-20'
-    },
-    {
-      id: 'BAG456789123',
-      status: 'delivered',
-      origin: 'Nairobi, Kenya',
-      destination: 'Kampala, Uganda',
-      weight: '30kg',
-      value: '$1,500',
-      customer: 'East Africa Logistics',
-      pickupDate: '2024-01-10',
-      estimatedDelivery: '2024-01-17'
+  const fetchShipments = async (view: string) => {
+    try {
+      setLoading(true)
+      const response = await fetch(`/api/v1/carrier/shipments?carrierId=${carrierId}&view=${view}`)
+      const data = await response.json()
+      
+      if (data.success) {
+        setShipments(data.data.shipments)
+        setStats(data.data.stats)
+      } else {
+        addToast('Failed to fetch shipments', 'error')
+      }
+    } catch (error) {
+      addToast('Error loading shipments', 'error')
+    } finally {
+      setLoading(false)
     }
-  ]
+  }
+
+  // Handle assignment actions
+  const handleAcceptAssignment = async (assignmentId: string) => {
+    try {
+      const response = await fetch(`/api/v1/carrier/assignments/${assignmentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'accept', carrierId })
+      })
+      
+      const data = await response.json()
+      if (data.success) {
+        addToast('Assignment accepted successfully!', 'success')
+        fetchShipments(activeTab)
+      } else {
+        addToast(data.error || 'Failed to accept assignment', 'error')
+      }
+    } catch (error) {
+      addToast('Error accepting assignment', 'error')
+    }
+  }
+
+  const handleDeclineAssignment = async (assignmentId: string, reason?: string) => {
+    try {
+      const response = await fetch(`/api/v1/carrier/assignments/${assignmentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'decline', carrierId, reason })
+      })
+      
+      const data = await response.json()
+      if (data.success) {
+        addToast('Assignment declined', 'info')
+        fetchShipments(activeTab)
+      } else {
+        addToast(data.error || 'Failed to decline assignment', 'error')
+      }
+    } catch (error) {
+      addToast('Error declining assignment', 'error')
+    }
+  }
+
+  // QR Code scanning
+  const handleQRScan = async (qrCodeData: string) => {
+    try {
+      const response = await fetch('/api/v1/carrier/qr-scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ qrCodeData, carrierId })
+      })
+      
+      const data = await response.json()
+      if (data.success) {
+        addToast(`Status updated to ${data.data.status}`, 'success')
+        fetchShipments(activeTab)
+      } else {
+        addToast(data.error || 'QR scan failed', 'error')
+      }
+    } catch (error) {
+      addToast('Error processing QR scan', 'error')
+    }
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'delivered': return 'text-green-600 bg-green-50'
-      case 'in-transit': return 'text-blue-600 bg-blue-50'
-      case 'picked-up': return 'text-yellow-600 bg-yellow-50'
-      case 'cancelled': return 'text-red-600 bg-red-50'
+      case 'in_transit': return 'text-blue-600 bg-blue-50'
+      case 'picked_up': return 'text-yellow-600 bg-yellow-50'
+      case 'accepted': return 'text-purple-600 bg-purple-50'
+      case 'assigned': return 'text-orange-600 bg-orange-50'
+      case 'pending': return 'text-red-600 bg-red-50'
       default: return 'text-gray-600 bg-gray-50'
     }
   }
@@ -112,11 +144,45 @@ export default function CarrierDashboard() {
   const getStatusDot = (status: string) => {
     switch (status) {
       case 'delivered': return 'bg-green-500'
-      case 'in-transit': return 'bg-blue-500'
-      case 'picked-up': return 'bg-yellow-500'
-      case 'cancelled': return 'bg-red-500'
+      case 'in_transit': return 'bg-blue-500'
+      case 'picked_up': return 'bg-yellow-500'
+      case 'accepted': return 'bg-purple-500'
+      case 'assigned': return 'bg-orange-500'
+      case 'pending': return 'bg-red-500'
       default: return 'bg-gray-500'
     }
+  }
+
+  // Countdown timer component
+  const CountdownTimer = ({ expiresAt }: { expiresAt: string }) => {
+    const [timeLeft, setTimeLeft] = useState('')
+    
+    useEffect(() => {
+      const timer = setInterval(() => {
+        const now = new Date().getTime()
+        const expiry = new Date(expiresAt).getTime()
+        const distance = expiry - now
+        
+        if (distance > 0) {
+          const hours = Math.floor(distance / (1000 * 60 * 60))
+          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
+          setTimeLeft(`${hours}h ${minutes}m`)
+        } else {
+          setTimeLeft('EXPIRED')
+        }
+      }, 1000)
+      
+      return () => clearInterval(timer)
+    }, [expiresAt])
+    
+    return (
+      <div className={`flex items-center space-x-1 text-xs font-medium ${
+        timeLeft === 'EXPIRED' ? 'text-red-600' : 'text-orange-600'
+      }`}>
+        <Timer className="w-3 h-3" />
+        <span>{timeLeft}</span>
+      </div>
+    )
   }
 
   return (
@@ -154,93 +220,193 @@ export default function CarrierDashboard() {
         <div className="flex-1 overflow-auto p-6">
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {carrierStats.map((stat, index) => (
-              <div key={index} className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                    <p className="text-2xl font-semibold text-gray-900 mt-2">{stat.value}</p>
-                  </div>
-                  <div className="flex items-center space-x-1 text-sm">
-                    {stat.trend === 'up' && <TrendingUp className="w-4 h-4 text-green-500" />}
-                    <span className={stat.trend === 'up' ? 'text-green-600 font-medium' : 'text-gray-600 font-medium'}>
-                      {stat.change}
-                    </span>
-                  </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Assigned</p>
+                  <p className="text-2xl font-semibold text-gray-900 mt-2">{stats.totalAssigned || 0}</p>
                 </div>
+                <Package className="w-8 h-8 text-blue-500" />
               </div>
-            ))}
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Pending Acceptance</p>
+                  <p className="text-2xl font-semibold text-orange-600 mt-2">{stats.pendingAcceptance || 0}</p>
+                </div>
+                <Clock className="w-8 h-8 text-orange-500" />
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Active Shipments</p>
+                  <p className="text-2xl font-semibold text-green-600 mt-2">{stats.activeShipments || 0}</p>
+                </div>
+                <Truck className="w-8 h-8 text-green-500" />
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Earnings</p>
+                  <p className="text-2xl font-semibold text-gray-900 mt-2">₦{stats.totalEarnings?.toLocaleString() || 0}</p>
+                </div>
+                <DollarSign className="w-8 h-8 text-purple-500" />
+              </div>
+            </div>
           </div>
 
-          {/* Recent Shipments */}
+          {/* Tab Navigation */}
+          <div className="bg-white rounded-lg border border-gray-200 mb-6">
+            <div className="border-b border-gray-200">
+              <nav className="flex space-x-8 px-6" aria-label="Tabs">
+                {[
+                  { key: 'all', label: 'All Shipments', icon: Package },
+                  { key: 'pending', label: 'Pending Acceptance', icon: Clock, badge: stats.pendingAcceptance },
+                  { key: 'accepted', label: 'Accepted', icon: CheckCircle },
+                  { key: 'active', label: 'Active Deliveries', icon: Truck }
+                ].map((tab) => {
+                  const Icon = tab.icon
+                  return (
+                    <button
+                      key={tab.key}
+                      onClick={() => setActiveTab(tab.key as any)}
+                      className={`${
+                        activeTab === tab.key
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span>{tab.label}</span>
+                      {tab.badge && tab.badge > 0 && (
+                        <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                          {tab.badge}
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
+              </nav>
+            </div>
+          </div>
+
+          {/* Shipments Table */}
           <div className="bg-white rounded-lg border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">Recent Shipments</h2>
-                <button className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1">
-                  <span>View All</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  {activeTab === 'all' && 'All Shipments'}
+                  {activeTab === 'pending' && 'Pending Acceptance'}
+                  {activeTab === 'accepted' && 'Accepted Shipments'}
+                  {activeTab === 'active' && 'Active Deliveries'}
+                </h2>
+                <div className="flex items-center space-x-2">
+                  <button className="bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-1 text-sm">
+                    <QrCode className="w-4 h-4" />
+                    <span>Scan QR</span>
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shipment ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Route</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Weight</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {recentShipments.map((shipment) => (
-                    <tr key={shipment.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{shipment.id}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{shipment.customer}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          <div className="flex items-center space-x-2">
-                            <span>{shipment.origin}</span>
-                            <ArrowRight className="w-3 h-3 text-gray-400" />
-                            <span>{shipment.destination}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(shipment.status)}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${getStatusDot(shipment.status)}`}></span>
-                          {shipment.status.charAt(0).toUpperCase() + shipment.status.slice(1).replace('-', ' ')}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {shipment.weight}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {shipment.value}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <div className="flex items-center space-x-2">
-                          <button className="text-blue-600 hover:text-blue-700">
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button className="text-gray-600 hover:text-gray-700">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
+            
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : shipments.length === 0 ? (
+              <div className="text-center py-12">
+                <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">No shipments found</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shipment</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Route</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Earnings</th>
+                      {activeTab === 'pending' && (
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Left</th>
+                      )}
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {shipments.map((shipmentView) => (
+                      <tr key={shipmentView.shipment.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">{shipmentView.shipment.trackingNumber}</div>
+                            <div className="text-xs text-gray-500">{shipmentView.shipment.weight}kg • {shipmentView.shipment.priority}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{shipmentView.customer.name}</div>
+                          <div className="text-xs text-gray-500">{shipmentView.customer.phone}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            <div className="flex items-center space-x-2">
+                              <span className="truncate max-w-20">{shipmentView.shipment.origin}</span>
+                              <ArrowRight className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                              <span className="truncate max-w-20">{shipmentView.shipment.destination}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(shipmentView.currentStatus.status)}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${getStatusDot(shipmentView.currentStatus.status)}`}></span>
+                            {shipmentView.currentStatus.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          ₦{shipmentView.earnings.total.toLocaleString()}
+                        </td>
+                        {activeTab === 'pending' && (
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <CountdownTimer expiresAt={shipmentView.assignment.expiresAt} />
+                          </td>
+                        )}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <div className="flex items-center space-x-2">
+                            {activeTab === 'pending' && shipmentView.assignment.status === 'pending' && (
+                              <>
+                                <button 
+                                  onClick={() => handleAcceptAssignment(shipmentView.assignment.id)}
+                                  className="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700"
+                                >
+                                  Accept
+                                </button>
+                                <button 
+                                  onClick={() => handleDeclineAssignment(shipmentView.assignment.id)}
+                                  className="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700"
+                                >
+                                  Decline
+                                </button>
+                              </>
+                            )}
+                            {(activeTab === 'accepted' || activeTab === 'active') && (
+                              <button className="text-blue-600 hover:text-blue-700">
+                                <QrCode className="w-4 h-4" />
+                              </button>
+                            )}
+                            <button className="text-gray-600 hover:text-gray-700">
+                              <Eye className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       </div>
