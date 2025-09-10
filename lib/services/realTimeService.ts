@@ -221,7 +221,7 @@ class RealTimeService {
     onSnapshot(notificationsQuery, (snapshot) => {
       snapshot.docChanges().forEach((change) => {
         if (change.type === 'added') {
-          const notification = { id: change.doc.id, ...change.doc.data() } as NotificationData;
+          const notification = { id: change.doc.id, ...change.doc.data() } as unknown as NotificationData;
           socket.emit('new_notification', notification);
         }
       });

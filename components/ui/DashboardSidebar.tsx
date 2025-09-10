@@ -23,7 +23,7 @@ import {
 import { Logo } from '@/components/Logo'
 
 interface SidebarProps {
-  userType: 'carrier' | 'admin'
+  userType: 'user' | 'carrier' | 'admin'
 }
 
 export default function DashboardSidebar({ userType }: SidebarProps) {
@@ -57,7 +57,7 @@ export default function DashboardSidebar({ userType }: SidebarProps) {
       href: '/dashboard/carriers',
       icon: Truck,
       active: pathname.startsWith('/dashboard/carriers'),
-      hidden: userType === 'carrier'
+      hidden: userType === 'carrier' || userType === 'user'
     },
     {
       label: 'Analytics',
@@ -118,14 +118,14 @@ export default function DashboardSidebar({ userType }: SidebarProps) {
       <div className="px-6 py-4 border-b border-gray-800">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm font-medium">
-            {userType === 'admin' ? 'A' : 'C'}
+            {userType === 'admin' ? 'A' : userType === 'carrier' ? 'C' : 'U'}
           </div>
           <div>
             <div className="text-sm font-medium text-white">
-              {userType === 'admin' ? 'Admin User' : 'Carrier User'}
+              {userType === 'admin' ? 'Admin User' : userType === 'carrier' ? 'Carrier User' : 'John Doe'}
             </div>
             <div className="text-xs text-gray-400">
-              {userType === 'admin' ? 'Administrator' : 'Logistics Partner'}
+              {userType === 'admin' ? 'Administrator' : userType === 'carrier' ? 'Logistics Partner' : 'Customer'}
             </div>
           </div>
         </div>

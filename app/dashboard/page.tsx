@@ -21,40 +21,57 @@ import {
   Plus,
   Search,
   Filter,
-  MoreHorizontal
+  MoreHorizontal,
+  Bell,
+  Settings,
+  User,
+  Zap,
+  Target,
+  Award,
+  ChevronRight,
+  ExternalLink
 } from 'lucide-react'
 import { useToast } from '@/components/ui/ToastContext'
 import DashboardSidebar from '@/components/ui/DashboardSidebar'
 
 export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [activeTab, setActiveTab] = useState('overview')
   const { addToast } = useToast()
-  const userType = 'carrier' // This would come from auth context
+  const userType = 'user' // This would come from auth context
 
   const stats = [
     {
       label: 'Total Shipments',
-      value: '2,847',
+      value: '24',
       change: '+12%',
-      trend: 'up'
+      trend: 'up',
+      icon: Package,
+      color: 'blue'
     },
     {
       label: 'In Transit',
-      value: '1,234',
+      value: '8',
       change: '+8%',
-      trend: 'up'
+      trend: 'up',
+      icon: Truck,
+      color: 'orange'
     },
     {
       label: 'Delivered',
-      value: '1,456',
+      value: '16',
       change: '+15%',
-      trend: 'up'
+      trend: 'up',
+      icon: CheckCircle,
+      color: 'green'
     },
     {
-      label: 'Revenue',
-      value: '$45,678',
+      label: 'Total Spent',
+      value: '$4,250',
       change: '+23%',
-      trend: 'up'
+      trend: 'up',
+      icon: DollarSign,
+      color: 'purple'
     }
   ]
 
@@ -186,125 +203,196 @@ export default function DashboardPage() {
     { id: 'analytics', label: 'Analytics', icon: <BarChart3 className="w-4 h-4" /> }
   ]
 
+  const getStatColor = (color: string) => {
+    switch (color) {
+      case 'blue': return 'bg-blue-500'
+      case 'orange': return 'bg-orange-500'
+      case 'green': return 'bg-green-500'
+      case 'purple': return 'bg-purple-500'
+      default: return 'bg-gray-500'
+    }
+  }
+
+  const getStatBgColor = (color: string) => {
+    switch (color) {
+      case 'blue': return 'bg-blue-50'
+      case 'orange': return 'bg-orange-50'
+      case 'green': return 'bg-green-50'
+      case 'purple': return 'bg-purple-50'
+      default: return 'bg-gray-50'
+    }
+  }
+
   return (
     <div className="flex h-screen bg-gray-50">
       <DashboardSidebar userType={userType} />
       
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="bg-white border-b border-gray-200 px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-              <p className="text-sm text-gray-600 mt-1">Welcome back! Here's what's happening with your shipments.</p>
+              <h1 className="text-3xl font-bold text-gray-900">Good morning, John</h1>
+              <p className="text-gray-600 mt-1">Here's what's happening with your shipments today</p>
             </div>
-            <div className="flex items-center space-x-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search shipments..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-64"
-                />
-              </div>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 text-sm font-medium">
-                <Plus className="w-4 h-4" />
-                <span>New Shipment</span>
+            <div className="flex items-center space-x-4">
+              <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                <Bell className="w-5 h-5" />
               </button>
+              <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                <Settings className="w-5 h-5" />
+              </button>
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <User className="w-4 h-4 text-white" />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-6 bg-gray-50">
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                    <p className="text-2xl font-semibold text-gray-900 mt-2">{stat.value}</p>
-                  </div>
-                  <div className="flex items-center space-x-1 text-sm">
-                    <TrendingUp className="w-4 h-4 text-green-500" />
-                    <span className="text-green-600 font-medium">{stat.change}</span>
+            {stats.map((stat, index) => {
+              const Icon = stat.icon
+              return (
+                <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-12 h-12 rounded-lg ${getStatBgColor(stat.color)} flex items-center justify-center`}>
+                        <Icon className={`w-6 h-6 ${getStatColor(stat.color).replace('bg-', 'text-')}`} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">{stat.label}</p>
+                        <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-1 text-sm">
+                      <TrendingUp className="w-4 h-4 text-green-500" />
+                      <span className="text-green-600 font-semibold">{stat.change}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
 
-          {/* Recent Shipments */}
-          <div className="bg-white rounded-lg border border-gray-200">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">Recent Shipments</h2>
-                <button className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1">
-                  <span>View All</span>
-                  <ArrowRight className="w-4 h-4" />
+          {/* Quick Actions & Recent Activity Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {/* Quick Actions */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <div className="space-y-3">
+                <button 
+                  onClick={handleNewShipment}
+                  className="w-full flex items-center justify-between p-3 text-left bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                      <Plus className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium text-gray-900">Create Shipment</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500" />
+                </button>
+                <button className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-50 rounded-lg transition-colors group">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center">
+                      <Search className="w-4 h-4 text-green-500" />
+                    </div>
+                    <span className="font-medium text-gray-900">Track Package</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
+                </button>
+                <button className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-50 rounded-lg transition-colors group">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
+                      <BarChart3 className="w-4 h-4 text-purple-500" />
+                    </div>
+                    <span className="font-medium text-gray-900">View Analytics</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
                 </button>
               </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shipment ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Route</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+
+            {/* Recent Shipments */}
+            <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="px-6 py-4 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">Recent Shipments</h3>
+                  <button className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1">
+                    <span>View All</span>
+                    <ExternalLink className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
                   {recentShipments.map((shipment) => (
-                    <tr key={shipment.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{shipment.id}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{shipment.customer}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          <div className="flex items-center space-x-2">
-                            <span>{shipment.origin}</span>
-                            <ArrowRight className="w-3 h-3 text-gray-400" />
-                            <span>{shipment.destination}</span>
-                          </div>
+                    <div key={shipment.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <Package className="w-5 h-5 text-blue-600" />
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <p className="font-medium text-gray-900">{shipment.id}</p>
+                          <p className="text-sm text-gray-500">{shipment.origin} → {shipment.destination}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(shipment.status)}`}>
                           <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${getStatusDot(shipment.status)}`}></span>
                           {shipment.status.charAt(0).toUpperCase() + shipment.status.slice(1).replace('-', ' ')}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {shipment.date}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {shipment.value}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <div className="flex items-center space-x-2">
-                          <button className="text-blue-600 hover:text-blue-700">
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button className="text-gray-600 hover:text-gray-700">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+                        <button className="text-gray-400 hover:text-gray-600">
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Performance Insights */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Delivery Performance */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Delivery Performance</h3>
+                <Target className="w-5 h-5 text-gray-400" />
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">On-time delivery</span>
+                  <span className="text-sm font-semibold text-gray-900">94%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-green-500 h-2 rounded-full" style={{ width: '94%' }}></div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Average delivery time</span>
+                  <span className="text-sm font-semibold text-gray-900">3.2 days</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Popular Routes */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Popular Routes</h3>
+                <MapPin className="w-5 h-5 text-gray-400" />
+              </div>
+              <div className="space-y-3">
+                {analyticsData.popularRoutes.map((route, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">{route.route}</span>
+                    <span className="text-sm font-semibold text-gray-900">{route.count} shipments</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

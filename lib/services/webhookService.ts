@@ -4,10 +4,14 @@ import {
   doc, 
   addDoc, 
   updateDoc, 
+  getDoc,
+  getDocs,
   query, 
   where, 
-  getDocs,
-  serverTimestamp 
+  orderBy, 
+  limit,
+  serverTimestamp,
+  onSnapshot
 } from 'firebase/firestore';
 import crypto from 'crypto';
 
@@ -316,7 +320,7 @@ class WebhookService {
     try {
       // Fetch event and webhook details
       const eventRef = doc(db, 'webhook_events', eventId);
-      const eventDoc = await eventRef.get();
+      const eventDoc = await getDoc(eventRef);
       
       if (!eventDoc.exists()) {
         console.error(`Webhook event not found: ${eventId}`);
@@ -326,7 +330,7 @@ class WebhookService {
       const event = eventDoc.data() as WebhookEvent;
       
       const webhookRef = doc(db, 'webhooks', event.endpointId);
-      const webhookDoc = await webhookRef.get();
+      const webhookDoc = await getDoc(webhookRef);
       
       if (!webhookDoc.exists()) {
         console.error(`Webhook not found: ${event.endpointId}`);
@@ -434,7 +438,9 @@ class WebhookService {
         totalWebhooks: webhooksSnapshot.size,
         activeWebhooks,
         totalEvents: eventsSnapshot.size,
-        ...eventStats
+        successfulEvents: eventStats.successful,
+        failedEvents: eventStats.failed,
+        retryingEvents: eventStats.retrying
       };
     } catch (error) {
       console.error('Failed to get webhook stats:', error);

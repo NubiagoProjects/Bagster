@@ -58,10 +58,10 @@ export default function CarrierDashboard() {
         setShipments(data.data.shipments)
         setStats(data.data.stats)
       } else {
-        addToast('Failed to fetch shipments', 'error')
+        addToast('error', 'Failed to fetch shipments')
       }
     } catch (error) {
-      addToast('Error loading shipments', 'error')
+      addToast('error', 'Error loading shipments')
     } finally {
       setLoading(false)
     }
@@ -78,13 +78,13 @@ export default function CarrierDashboard() {
       
       const data = await response.json()
       if (data.success) {
-        addToast('Assignment accepted successfully!', 'success')
+        addToast('success', 'Assignment accepted successfully!')
         fetchShipments(activeTab)
       } else {
-        addToast(data.error || 'Failed to accept assignment', 'error')
+        addToast('error', data.error || 'Failed to accept assignment')
       }
     } catch (error) {
-      addToast('Error accepting assignment', 'error')
+      addToast('error', 'Error accepting assignment')
     }
   }
 
@@ -98,13 +98,13 @@ export default function CarrierDashboard() {
       
       const data = await response.json()
       if (data.success) {
-        addToast('Assignment declined', 'info')
+        addToast('info', 'Assignment declined')
         fetchShipments(activeTab)
       } else {
-        addToast(data.error || 'Failed to decline assignment', 'error')
+        addToast('error', data.error || 'Failed to decline assignment')
       }
     } catch (error) {
-      addToast('Error declining assignment', 'error')
+      addToast('error', 'Error declining assignment')
     }
   }
 
@@ -119,13 +119,13 @@ export default function CarrierDashboard() {
       
       const data = await response.json()
       if (data.success) {
-        addToast(`Status updated to ${data.data.status}`, 'success')
+        addToast('success', `Status updated to ${data.data.status}`)
         fetchShipments(activeTab)
       } else {
-        addToast(data.error || 'QR scan failed', 'error')
+        addToast('error', data.error || 'QR scan failed')
       }
     } catch (error) {
-      addToast('Error processing QR scan', 'error')
+      addToast('error', 'Error processing QR scan')
     }
   }
 
@@ -191,77 +191,120 @@ export default function CarrierDashboard() {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="bg-white border-b border-gray-200 px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">Carrier Dashboard</h1>
-              <p className="text-sm text-gray-600 mt-1">Manage your shipments and grow your business</p>
+              <h1 className="text-3xl font-bold text-gray-900">Welcome back, FastTrack Logistics</h1>
+              <p className="text-gray-600 mt-1">Manage your shipments and grow your business</p>
             </div>
-            <div className="flex items-center space-x-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search shipments..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-64"
-                />
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 bg-green-50 px-3 py-2 rounded-lg">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-sm font-medium text-green-700">Online</span>
               </div>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 text-sm font-medium">
-                <Plus className="w-4 h-4" />
-                <span>New Route</span>
+              <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors relative">
+                <Bell className="w-5 h-5" />
+                {stats.pendingAcceptance > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {stats.pendingAcceptance}
+                  </span>
+                )}
               </button>
+              <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                <Settings className="w-5 h-5" />
+              </button>
+              <div className="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center">
+                <Truck className="w-4 h-4 text-white" />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-6 bg-gray-50">
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Assigned</p>
-                  <p className="text-2xl font-semibold text-gray-900 mt-2">{stats.totalAssigned || 0}</p>
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center">
+                    <Package className="w-6 h-6 text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Assigned</p>
+                    <p className="text-2xl font-bold text-gray-900 mt-1">{stats.totalAssigned || 0}</p>
+                  </div>
                 </div>
-                <Package className="w-8 h-8 text-blue-500" />
+                <div className="text-right">
+                  <div className="flex items-center space-x-1 text-sm">
+                    <TrendingUp className="w-4 h-4 text-green-500" />
+                    <span className="text-green-600 font-semibold">+12%</span>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Pending Acceptance</p>
-                  <p className="text-2xl font-semibold text-orange-600 mt-2">{stats.pendingAcceptance || 0}</p>
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 rounded-lg bg-orange-50 flex items-center justify-center">
+                    <Clock className="w-6 h-6 text-orange-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Pending Acceptance</p>
+                    <p className="text-2xl font-bold text-orange-600 mt-1">{stats.pendingAcceptance || 0}</p>
+                  </div>
                 </div>
-                <Clock className="w-8 h-8 text-orange-500" />
+                {stats.pendingAcceptance > 0 && (
+                  <div className="bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full">
+                    Urgent
+                  </div>
+                )}
               </div>
             </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Active Shipments</p>
-                  <p className="text-2xl font-semibold text-green-600 mt-2">{stats.activeShipments || 0}</p>
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 rounded-lg bg-green-50 flex items-center justify-center">
+                    <Truck className="w-6 h-6 text-green-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Active Shipments</p>
+                    <p className="text-2xl font-bold text-green-600 mt-1">{stats.activeShipments || 0}</p>
+                  </div>
                 </div>
-                <Truck className="w-8 h-8 text-green-500" />
+                <div className="text-right">
+                  <div className="flex items-center space-x-1 text-sm">
+                    <TrendingUp className="w-4 h-4 text-green-500" />
+                    <span className="text-green-600 font-semibold">+8%</span>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Earnings</p>
-                  <p className="text-2xl font-semibold text-gray-900 mt-2">₦{stats.totalEarnings?.toLocaleString() || 0}</p>
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 rounded-lg bg-purple-50 flex items-center justify-center">
+                    <DollarSign className="w-6 h-6 text-purple-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Earnings</p>
+                    <p className="text-2xl font-bold text-gray-900 mt-1">₦{stats.totalEarnings?.toLocaleString() || 0}</p>
+                  </div>
                 </div>
-                <DollarSign className="w-8 h-8 text-purple-500" />
+                <div className="text-right">
+                  <div className="flex items-center space-x-1 text-sm">
+                    <TrendingUp className="w-4 h-4 text-green-500" />
+                    <span className="text-green-600 font-semibold">+23%</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Tab Navigation */}
-          <div className="bg-white rounded-lg border border-gray-200 mb-6">
-            <div className="border-b border-gray-200">
-              <nav className="flex space-x-8 px-6" aria-label="Tabs">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+            <div className="p-2">
+              <nav className="flex space-x-2" aria-label="Tabs">
                 {[
                   { key: 'all', label: 'All Shipments', icon: Package },
                   { key: 'pending', label: 'Pending Acceptance', icon: Clock, badge: stats.pendingAcceptance },
@@ -275,14 +318,14 @@ export default function CarrierDashboard() {
                       onClick={() => setActiveTab(tab.key as any)}
                       className={`${
                         activeTab === tab.key
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2`}
+                          ? 'bg-orange-50 text-orange-600 border-orange-200'
+                          : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50 border-transparent'
+                      } relative flex items-center space-x-2 px-4 py-3 rounded-lg font-medium text-sm border transition-all duration-200`}
                     >
                       <Icon className="w-4 h-4" />
                       <span>{tab.label}</span>
                       {tab.badge && tab.badge > 0 && (
-                        <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                        <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full ml-1">
                           {tab.badge}
                         </span>
                       )}
@@ -362,7 +405,7 @@ export default function CarrierDashboard() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(shipmentView.currentStatus.status)}`}>
                             <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${getStatusDot(shipmentView.currentStatus.status)}`}></span>
-                            {shipmentView.currentStatus.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            {shipmentView.currentStatus.status.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">

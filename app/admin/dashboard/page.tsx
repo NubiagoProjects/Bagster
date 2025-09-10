@@ -138,151 +138,226 @@ export default function AdminDashboard() {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="bg-white border-b border-gray-200 px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">Admin Dashboard</h1>
-              <p className="text-sm text-gray-600 mt-1">Manage platform operations and monitor system health</p>
+              <h1 className="text-3xl font-bold text-gray-900">Admin Control Center</h1>
+              <p className="text-gray-600 mt-1">Manage platform operations and monitor system health</p>
             </div>
-            <div className="flex items-center space-x-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search users, carriers..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm w-64"
-                />
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 bg-green-50 px-3 py-2 rounded-lg">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium text-green-700">All Systems Operational</span>
               </div>
-              <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2 text-sm font-medium">
-                <Plus className="w-4 h-4" />
-                <span>Add User</span>
+              <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors relative">
+                <Bell className="w-5 h-5" />
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                  {pendingApprovals.length}
+                </span>
               </button>
+              <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                <Settings className="w-5 h-5" />
+              </button>
+              <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                <Shield className="w-4 h-4 text-white" />
+              </div>
             </div>
           </div>
           
           {/* Navigation Tabs */}
-          <div className="mt-4 border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
+          <div className="mt-6">
+            <div className="bg-gray-100 p-1 rounded-lg inline-flex">
               <button
                 onClick={() => setActiveTab('overview')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`px-4 py-2 rounded-md font-medium text-sm transition-all duration-200 ${
                   activeTab === 'overview'
-                    ? 'border-purple-500 text-purple-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'bg-white text-purple-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
+                <Activity className="w-4 h-4 inline mr-2" />
                 Overview
               </button>
               <button
                 onClick={() => setActiveTab('carriers')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`px-4 py-2 rounded-md font-medium text-sm transition-all duration-200 ${
                   activeTab === 'carriers'
-                    ? 'border-purple-500 text-purple-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'bg-white text-purple-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
+                <Truck className="w-4 h-4 inline mr-2" />
                 Carriers
               </button>
               <button
                 onClick={() => setActiveTab('api-keys')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`px-4 py-2 rounded-md font-medium text-sm transition-all duration-200 ${
                   activeTab === 'api-keys'
-                    ? 'border-purple-500 text-purple-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'bg-white text-purple-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
+                <Zap className="w-4 h-4 inline mr-2" />
                 API Keys
               </button>
-            </nav>
+            </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-6 bg-gray-50">
           {activeTab === 'overview' && (
             <>
               {/* Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {adminStats.map((stat, index) => (
-                  <div key={index} className="bg-white rounded-lg border border-gray-200 p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                        <p className="text-2xl font-semibold text-gray-900 mt-2">{stat.value}</p>
-                      </div>
-                      <div className="flex items-center space-x-1 text-sm">
-                        {stat.trend === 'up' && <TrendingUp className="w-4 h-4 text-green-500" />}
-                        <span className={stat.trend === 'up' ? 'text-green-600 font-medium' : 'text-gray-600 font-medium'}>
-                          {stat.change}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                {adminStats.map((stat, index) => {
+                  const getStatIcon = () => {
+                    switch (stat.label) {
+                      case 'Total Users': return <Users className="w-6 h-6 text-blue-500" />
+                      case 'Active Carriers': return <Truck className="w-6 h-6 text-orange-500" />
+                      case 'Platform Revenue': return <DollarSign className="w-6 h-6 text-green-500" />
+                      case 'System Health': return <Shield className="w-6 h-6 text-purple-500" />
+                      default: return <Activity className="w-6 h-6 text-gray-500" />
+                    }
+                  }
+                  
+                  const getStatBgColor = () => {
+                    switch (stat.label) {
+                      case 'Total Users': return 'bg-blue-50'
+                      case 'Active Carriers': return 'bg-orange-50'
+                      case 'Platform Revenue': return 'bg-green-50'
+                      case 'System Health': return 'bg-purple-50'
+                      default: return 'bg-gray-50'
+                    }
+                  }
 
-              {/* Recent Activity & Pending Approvals */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                {/* Recent Activity */}
-                <div className="bg-white rounded-lg border border-gray-200">
-                  <div className="px-6 py-4 border-b border-gray-200">
-                    <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
-                  </div>
-                  <div className="divide-y divide-gray-200">
-                    {recentActivity.map((activity) => (
-                      <div key={activity.id} className="p-6 hover:bg-gray-50">
-                        <div className="flex items-start space-x-4">
-                          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                            {activity.type === 'user_signup' && <User className="w-4 h-4 text-purple-600" />}
-                            {activity.type === 'carrier_approved' && <Truck className="w-4 h-4 text-purple-600" />}
-                            {activity.type === 'shipment_completed' && <Package className="w-4 h-4 text-purple-600" />}
+                  return (
+                    <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className={`w-12 h-12 rounded-lg ${getStatBgColor()} flex items-center justify-center`}>
+                            {getStatIcon()}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900">{activity.description}</p>
-                            <p className="text-sm text-gray-500">{activity.timestamp}</p>
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">{stat.label}</p>
+                            <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="flex items-center space-x-1 text-sm">
+                            {stat.trend === 'up' && <TrendingUp className="w-4 h-4 text-green-500" />}
+                            <span className={stat.trend === 'up' ? 'text-green-600 font-semibold' : 'text-gray-600 font-semibold'}>
+                              {stat.change}
+                            </span>
                           </div>
                         </div>
                       </div>
-                    ))}
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Recent Activity & Pending Approvals */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                {/* Recent Activity */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+                  <div className="px-6 py-4 border-b border-gray-100">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                      <Activity className="w-5 h-5 text-gray-400" />
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <div className="space-y-4">
+                      {recentActivity.map((activity) => (
+                        <div key={activity.id} className="flex items-start space-x-4 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            {activity.type === 'user_signup' && <User className="w-5 h-5 text-purple-600" />}
+                            {activity.type === 'carrier_approved' && <Truck className="w-5 h-5 text-purple-600" />}
+                            {activity.type === 'shipment_completed' && <Package className="w-5 h-5 text-purple-600" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900">{activity.description}</p>
+                            <p className="text-xs text-gray-500 mt-1">{activity.timestamp}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
                 {/* Pending Approvals */}
-                <div className="bg-white rounded-lg border border-gray-200">
-                  <div className="px-6 py-4 border-b border-gray-200">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+                  <div className="px-6 py-4 border-b border-gray-100">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold text-gray-900">Pending Approvals</h2>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                        {pendingApprovals.length} pending
-                      </span>
+                      <h3 className="text-lg font-semibold text-gray-900">Pending Approvals</h3>
+                      <div className="flex items-center space-x-2">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          {pendingApprovals.length} urgent
+                        </span>
+                        <AlertTriangle className="w-5 h-5 text-orange-500" />
+                      </div>
                     </div>
                   </div>
-                  <div className="divide-y divide-gray-200">
-                    {pendingApprovals.map((approval) => (
-                      <div key={approval.id} className="p-6 hover:bg-gray-50">
-                        <div className="flex items-center justify-between">
+                  <div className="p-6">
+                    <div className="space-y-4">
+                      {pendingApprovals.map((approval) => (
+                        <div key={approval.id} className="flex items-center justify-between p-4 bg-orange-50 rounded-lg border border-orange-100">
                           <div className="flex items-center space-x-4">
-                            <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                              <User className="w-5 h-5 text-gray-600" />
+                            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                              <Truck className="w-5 h-5 text-orange-600" />
                             </div>
                             <div>
                               <p className="font-medium text-gray-900">{approval.name}</p>
                               <p className="text-sm text-gray-500">{approval.location}</p>
+                              <p className="text-xs text-gray-400">Submitted {approval.submittedAt}</p>
                             </div>
                           </div>
                           <div className="flex space-x-2">
-                            <button className="px-3 py-1 text-sm text-red-600 border border-red-200 rounded hover:bg-red-50">
+                            <button className="px-3 py-1.5 text-sm text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
                               Reject
                             </button>
-                            <button className="px-3 py-1 text-sm text-white bg-purple-600 rounded hover:bg-purple-700">
+                            <button className="px-3 py-1.5 text-sm text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors">
                               Approve
                             </button>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* System Metrics */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900">System Performance</h3>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-green-600 font-medium">All systems operational</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Zap className="w-8 h-8 text-green-600" />
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900">99.9%</p>
+                    <p className="text-sm text-gray-600">Uptime</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Globe className="w-8 h-8 text-blue-600" />
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900">1.2s</p>
+                    <p className="text-sm text-gray-600">Avg Response</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Award className="w-8 h-8 text-purple-600" />
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900">4.8/5</p>
+                    <p className="text-sm text-gray-600">User Rating</p>
                   </div>
                 </div>
               </div>
